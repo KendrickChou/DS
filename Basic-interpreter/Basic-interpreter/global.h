@@ -6,8 +6,10 @@
  * LP: '('
  * RP: ')'
  * EQ: '='
+ * GT: '>'
+ * LT: '<'
 */
-enum OPERATION{ADD,SUB,MUL,DIV,EXP,LP,RP,EQ};
+enum OPERATION{ADD,SUB,MUL,DIV,EXP,LP,RP,EQ,GT,LT};
 
 enum STATE{ERR,REM,LET,PRINT,INPUT,GOTO,IF,THEN,END};
 

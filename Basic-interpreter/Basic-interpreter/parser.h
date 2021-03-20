@@ -15,13 +15,19 @@ private:
     void handleOperator(OPERATION op);
     void handleOperand(token operand);
     void deleteTree(Expression *root);
+    void printParserTree(Expression *root,std::string &print,int level);
+    void addTab(std::string &print,int level);
+    std::string opToString(OPERATION op);
 
 public:
     parser();
-    parser(QVector<token> parseTokens);
+    void setParser(QVector<token> parseTokens);
+    void clearParser();
     ~parser();
     void parseExp();
     int evalExp(EvaluationContext &context);
+    std::string getIdentifierName();
+    std::string printLAST();
 };
 
 #endif // PARSER_H

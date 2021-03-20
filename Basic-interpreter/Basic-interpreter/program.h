@@ -24,13 +24,14 @@ public:
     LINE_PROPERTY checkLine(const std::string &text);
     std::string outputLine();
     std::string getCurLine();
+    std::string getLineNum();
+    void jumpLine(int Id);
     void initCurLine();
     void clearLine();
 
     void readFile(QFile &CodeFile);
 
 public slots:
-    void jumpLine(int Id);
 };
 
 #endif // PROGRAM_H

@@ -117,9 +117,9 @@ int CompoundExp::eval(EvaluationContext &context)
 
 std::string CompoundExp::toString()
 {
-    std::string compound;
-    compound += this->getLHS()->toString();
-    compound += ' ';
+    std::string compoundString;
+    Expression *left = this->getLHS();
+    Expression *right = this->getRHS();
     std::string opToString;
     switch (this->op) {
     case ADD:
@@ -140,10 +140,13 @@ std::string CompoundExp::toString()
     default:
         break;
     }
-    compound += opToString;
-    compound += ' ';
-    compound += this->getRHS()->toString();
-    return compound;
+    compoundString += opToString;
+    compoundString += "\n\t";
+    compoundString += left->toString();
+    compoundString += "\n\t";
+    compoundString += right->toString();
+    delete left,right;
+    return compoundString;
 }
 
 ExpressionType CompoundExp::type()
@@ -215,5 +218,17 @@ bool EvaluationContext::isDefined(std::string var)
 {
     return this->symbolTable.count(var);
 }
+
+void EvaluationContext::clearContext()
+{
+    symbolTable.clear();
+}
+
+void EvaluationContext::copySymbolTable(std::map<std::string, int> &dest)
+{
+    dest = symbolTable;
+}
+
+
 
 //****************EvaluationContext******************//

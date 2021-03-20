@@ -8,7 +8,7 @@
 
 class EvaluationContext;
 
-enum ExpressionType {CONSTANT , IDENTIFIER , COMPOUND};
+enum ExpressionType {ERR_Type ,CONSTANT , IDENTIFIER , COMPOUND};
 
 class Expression{
 public:
@@ -75,6 +75,8 @@ public:
     void setValue(std::string var, int value);
     int getValue(std::string var);
     bool isDefined(std::string var);
+    void clearContext();
+    void copySymbolTable(std::map<std::string,int> &dest);
 
 private:
     std::map<std::string, int> symbolTable;

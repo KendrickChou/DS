@@ -2,13 +2,19 @@
 
 parser::parser()
 {
+    root = NULL;
 }
 
-parser::parser(QVector<token> parseTokens)
+void parser::setParser(QVector<token> parseTokens)
 {
+    this->parseTokens.clear();
     this->parseTokens = parseTokens;
 
     this->parseExp();
+}
+
+void parser::clearParser()
+{
 }
 
 parser::~parser()
@@ -18,13 +24,17 @@ parser::~parser()
 
 void parser::deleteTree(Expression *root)
 {
-    switch (root->type()) {
+    if(root == NULL) return;
+    switch (root->type()){
     case CONSTANT:
     case IDENTIFIER:
         delete root;
+        break;
     case COMPOUND:{
         deleteTree(root->getLHS());
         deleteTree(root->getRHS());
+        delete root;
+        break;
     }
     }
 }
@@ -55,7 +65,82 @@ void parser::parseExp()
 
 int parser::evalExp(EvaluationContext &context)
 {
-   return root->eval(context);
+    return root->eval(context);
+}
+
+std::string parser::getIdentifierName()
+{
+    return root->getIdentifierName();
+}
+
+std::string parser::printLAST()
+{
+    std::string print;
+    printParserTree(this->root,print,1);
+    return print;
+}
+
+void parser::addTab(std::string &print, int level)
+{
+    for(int i = 0;i < level;++i){
+        print += "    ";
+    }
+}
+
+std::string parser::opToString(OPERATION op)
+{
+    switch (op) {
+    case ADD:
+        return "+";
+    case SUB:
+        return "-";
+    case MUL:
+        return "*";
+    case DIV:
+        return "/";
+    case EXP:
+        return "**";
+    case LP:
+        return "(";
+    case RP:
+        return ")";
+    case EQ:
+        return "=";
+    case GT:
+        return ">";
+    case LT:
+        return "<";
+    }
+}
+
+void parser::printParserTree(Expression *root,std::string &print, int level)
+{
+    switch (root->type()) {
+    case CONSTANT:
+    {
+        addTab(print,level);
+        print += std::to_string(root->getConstantValue());
+        print += '\n';
+        break;
+    }
+    case IDENTIFIER:
+    {
+        addTab(print,level);
+        print += root->getIdentifierName();
+        print += '\n';
+        break;
+    }
+    case COMPOUND:
+    {
+       addTab(print,level);
+       print += opToString(root->getOperator());
+       print += '\n';
+       printParserTree(root->getLHS(),print,level + 1);
+       printParserTree(root->getRHS(),print,level + 1);
+       break;
+    }
+    }
+    return;
 }
 
 void parser::handleOperand(token operand)
@@ -84,7 +169,7 @@ void parser::handleOperator(OPERATION op)
     case ADD:
     case SUB:
     {
-        while(operators.top() == ADD || operators.top() == SUB){
+        while(!operators.empty() && operators.top() != LP && operators.top() != EQ){
             CompoundExp *compound = new CompoundExp(operators.pop(),operands.pop(),operands.pop());
             operands.append(compound);
         }
@@ -94,7 +179,7 @@ void parser::handleOperator(OPERATION op)
     case MUL:
     case DIV:
     {
-        while(operators.top() == MUL || operators.top() == DIV){
+        while(!operators.empty() && (operators.top() == MUL || operators.top() == DIV || operators.top() == EXP)){
             CompoundExp *compound = new CompoundExp(operators.pop(),operands.pop(),operands.pop());
             operands.append(compound);
         }
@@ -117,11 +202,7 @@ void parser::handleOperator(OPERATION op)
     }
     case EXP:
     {
-        operators.append(EXP);
-        while(operators.top() == EXP){
-            CompoundExp *compound = new CompoundExp(op,operands.pop(),operands.pop());
-            operands.append(compound);
-        }
+        operators.append(op);
         break;
     }
     case EQ:

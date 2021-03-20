@@ -64,8 +64,13 @@ std::string program::getCurLine()
         line = curLine->second;
         ++curLine;
     }
-    else line = "END";
+    else line = "REACH END";
     return line;
+}
+
+std::string program::getLineNum()
+{
+    return std::to_string(curLine->first);
 }
 
 void program::initCurLine()
