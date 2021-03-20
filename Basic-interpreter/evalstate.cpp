@@ -22,7 +22,12 @@
 //    return symbolTable;
 //}
 
-//void EvalState::setSymbolTable(const std::map<std::string, int> &value)
-//{
-//    symbolTable = value;
-//}
+void EvalState::setSymbolTable(std::map<std::string, int> value)
+{
+    symbolTable = value;
+}
+
+void EvalState::setCurLine(const std::string lineNum)
+{
+    curLineNum = lineNum;
+}

@@ -12,6 +12,7 @@ class program
 {
 private:
     Buffer *buffer;
+    std::map<int,std::string>::iterator curLine;
 
 public:
     program();
@@ -22,9 +23,15 @@ public:
     void deleteLine(std::string Id);
     LINE_PROPERTY checkLine(const std::string &text);
     std::string outputLine();
+    std::string getCurLine();
+    std::string getLineNum();
+    void jumpLine(int Id);
+    void initCurLine();
     void clearLine();
 
     void readFile(QFile &CodeFile);
+
+public slots:
 };
 
 #endif // PROGRAM_H

@@ -1,80 +1,85 @@
 #ifndef EXP_H
 #define EXP_H
 
+#include "global.h"
 #include <string>
 #include <map>
+#include <cmath>
 
-//class EvaluationContext;
+class EvaluationContext;
 
-//enum ExpressionType {CONSTANT , IDENTIFIER , COMPOUND};
+enum ExpressionType {ERR_Type ,CONSTANT , IDENTIFIER , COMPOUND};
 
-//class Expression{
-//public:
-//    Expression();
-//    virtual ~Expression;
-//    virtual int eval(EvaluationContext &context) = 0;
-//    virtual std::string toString() = 0;
-//    virtual ExpressionType type() = 0;
+class Expression{
+public:
+    Expression() {}
+    ~Expression() {}
+    virtual int eval(EvaluationContext &context) = 0;
+    virtual std::string toString() = 0;
+    virtual ExpressionType type() = 0;
 
-//    virtual int getConstantValue();
-//    virtual std::string getIdentifierName();
-//    virtual std::string getOperator();
-//    virtual Expression *getLHS();
-//    virtual Expression *getRHS();
-//};
+    virtual int getConstantValue();
+    virtual std::string getIdentifierName();
+    virtual OPERATION getOperator();
+    virtual Expression *getLHS();
+    virtual Expression *getRHS();
+};
 
-//class ConstantExp:public Expression{
-//public:
-//    ConstantExp(int val);
+class ConstantExp:public Expression{
+public:
+    ConstantExp(int val);
 
-//    virtual int eval(EvaluationContext &context);
-//    virtual std::string toString();
-//    virtual ExpressionType type();
-//    virtual int getConstantValue();
+    virtual int eval(EvaluationContext &context);
+    virtual std::string toString();
+    virtual ExpressionType type();
+    virtual int getConstantValue();
 
-//private:
-//    int value;
-//};
+private:
+    int value;
+};
+// why long?
 
-//class IdentifierExp:public Expression{
-//public:
-//    IdentifierExp(std::string name);
+class IdentifierExp:public Expression{
+public:
+    IdentifierExp(std::string name);
 
-//    virtual int eval(EvaluationContext &context);
-//    virtual std::string toString();
-//    virtual ExpressionType type();
-//    virtual std::string getIdentifierName();
+    virtual int eval(EvaluationContext &context);
+    virtual std::string toString();
+    virtual ExpressionType type();
+    virtual std::string getIdentifierName();
 
-//private:
-//    std::string name;
-//};
+private:
+    std::string name;
+};
 
-//class CompoundExp: public Expression{
-//public:
-//    CompoundExp(std::string op, Expression *lhs, Expression *rhs);
-//    virtual ~CompoundExp();
+class CompoundExp: public Expression{
+public:
+    CompoundExp(OPERATION op, Expression *rhs, Expression *lhs);
+    virtual ~CompoundExp() {}
 
-//    virtual int eval(EvaluationContext &context);
-//    virtual std::string toString();
-//    virtual ExpressionType type();
+    virtual int eval(EvaluationContext &context);
+    virtual std::string toString();
+    virtual ExpressionType type();
 
-//    virtual std::string getOperator();
-//    virtual Expression *getLHS();
-//    virtual Expression *getRHS();
+    virtual OPERATION getOperator();
+    virtual Expression *getLHS();
+    virtual Expression *getRHS();
 
-//private:
-//    std::string op;
-//    Expression *lhs,*rhs;
-//};
+private:
+    OPERATION op;
+    Expression *lhs,*rhs;
+};
 
-//class EvaluationContext{
-//public:
-//    void setValue(std::string var, int value);
-//    int getValue(std::string var);
-//    bool isDefined(std::string var);
+class EvaluationContext{
+public:
+    void setValue(std::string var, int value);
+    int getValue(std::string var);
+    bool isDefined(std::string var);
+    void clearContext();
+    void copySymbolTable(std::map<std::string,int> &dest);
 
-//private:
-//    std::map<std::string, int> symbolTable;
-//};
+private:
+    std::map<std::string, int> symbolTable;
+};
 
 #endif // EXP_H

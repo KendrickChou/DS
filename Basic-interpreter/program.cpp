@@ -10,12 +10,13 @@ program::~program(){
 }
 
 LINE_PROPERTY program::checkLine(const std::string &text){
-    string Id;
+    std::string Id;
     int i = 0;
-    while(text[i] != ' ' && i < text.size()){
+    while(isdigit(text[i]) && i < text.size()){
         Id += text[i];
         ++i;
     }
+    if(i == 0) return INVALID;
     for(int j = 0;j < Id.size();++j){
         if(Id[j] < '0' || Id[j] > '9') return INVALID;
     }
@@ -45,8 +46,36 @@ void program::deleteLine(std::string Id){
     buffer->deleteLine(Id);
 }
 
+void program::jumpLine(int Id)
+{
+    if(buffer->lineMap->count(Id)){
+        curLine = buffer->lineMap->find(Id);
+    }
+}
+
 std::string program::outputLine(){
     return buffer->outputLine();
+}
+
+std::string program::getCurLine()
+{
+    std::string line;
+    if(curLine != buffer->lineMap->end()){
+        line = curLine->second;
+        ++curLine;
+    }
+    else line = "REACH END";
+    return line;
+}
+
+std::string program::getLineNum()
+{
+    return std::to_string(curLine->first);
+}
+
+void program::initCurLine()
+{
+    curLine = buffer->lineMap->begin();
 }
 
 void program::clearLine()
@@ -59,7 +88,7 @@ void program::readFile(QFile &CodeFile)
     std::string FileName = CodeFile.fileName().toStdString();
     std::ifstream  file;
     file.open(FileName);
-    string line;
+    std::string line;
     while(getline(file,line)){
         buffer->appendLine(line);
     }
