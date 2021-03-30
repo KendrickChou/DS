@@ -31,7 +31,7 @@
          <item>
           <widget class="QLabel" name="Code_Label">
            <property name="text">
-            <string>代码</string>
+            <string>Code</string>
            </property>
           </widget>
          </item>
@@ -45,7 +45,7 @@
          <item>
           <widget class="QLabel" name="Result_Label">
            <property name="text">
-            <string>运行结果</string>
+            <string>Result</string>
            </property>
           </widget>
          </item>
@@ -61,7 +61,7 @@
        <item>
         <widget class="QLabel" name="LAST_Label">
          <property name="text">
-          <string>语句与语法树</string>
+          <string>LAST</string>
          </property>
         </widget>
        </item>
@@ -75,21 +75,21 @@
        <item>
         <widget class="QPushButton" name="Load_Btn">
          <property name="text">
-          <string>载入代码</string>
+          <string>LOAD</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="Run_Btn">
          <property name="text">
-          <string>执行代码</string>
+          <string>RUN</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="Clear_Btn">
          <property name="text">
-          <string>清空代码</string>
+          <string>CLEAR</string>
          </property>
         </widget>
        </item>
@@ -100,7 +100,7 @@
        <item>
         <widget class="QLabel" name="Input_Btn">
          <property name="text">
-          <string>命令输入窗口</string>
+          <string>Input</string>
          </property>
         </widget>
        </item>

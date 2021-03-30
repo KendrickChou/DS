@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QFile>
 #include <qinputdialog.h>
+#include <QDesktopServices>
 #include "program.h"
 #include "statment.h"
 #include "evalstate.h"
@@ -30,8 +31,11 @@ private:
     EvalState evalStat;
     void refreshCodeBrowser();
     void printLAST();
+    bool checkAndexecuteCmd(std::string cmd);
+    char *trim(std::string s);
 private slots:
     void runCode();
+    void getInput();
     void printResult(int);
     void input();
     void GOTO_Line(int);

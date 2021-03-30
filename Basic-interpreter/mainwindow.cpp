@@ -9,11 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     ProgramCode = new program;
 
     connect(ui->Input_Line,ui->Input_Line->returnPressed,
-            this,[=] (){
-        ProgramCode->readLine(ui->Input_Line->text().toStdString());
-        refreshCodeBrowser();
-        ui->Input_Line->clear();
-    });
+            this,getInput);
     connect(ui->Clear_Btn,ui->Clear_Btn->clicked,
             ui->Code_Browser,[=](){
         ProgramCode->clearLine();
@@ -26,9 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
             this,[=](){
         QFile CodeFile(QFileDialog::getOpenFileName(this,tr("Open Code File"),
               "C:\myCode\DS",tr("Text files (*.txt)")));
-        ProgramCode->clearLine();
         context.clearContext();
-        ui->Result_Browser->clear();
         ProgramCode->readFile(CodeFile);
         refreshCodeBrowser();
     });
@@ -63,6 +57,20 @@ void MainWindow::runCode()
     }
 }
 
+void MainWindow::getInput()
+{
+    std::string inputLine = ui->Input_Line->text().toStdString();
+    if(checkAndexecuteCmd(inputLine)){
+        ui->Input_Line->clear();
+        return;
+    }
+    else{
+        ProgramCode->readLine(inputLine);
+        refreshCodeBrowser();
+        ui->Input_Line->clear();
+    }
+}
+
 void MainWindow::printResult(int pNum)
 {
     QString printLine = QString::number(pNum);
@@ -77,6 +85,8 @@ void MainWindow::input()
                                          "Please input your Identifier value"
                                          ,QLineEdit::Normal,"?",&ok);
     int inputNum = text.QString::toInt();
+
+
     stat->setIdentifier(context,inputNum);
 }
 
@@ -104,5 +114,53 @@ void MainWindow::printLAST()
         LAST_Line += printLASTStat->printLAST();
         ui->LAST_Browser->append(QString::fromStdString(LAST_Line));
     }
+}
+
+bool MainWindow::checkAndexecuteCmd(std::string cmd)
+{
+    const char *command = cmd.data();
+    if(!strncmp(command,"RUN",3)){
+        this->runCode();
+        return true;
+    }
+    else if(!strncmp(command,"LOAD",4)){
+        QFile CodeFile(QFileDialog::getOpenFileName(this,tr("Open Code File"),
+              "C:\myCode\DS",tr("Text files (*.txt)")));
+        ProgramCode->clearLine();
+        context.clearContext();
+        ui->Result_Browser->clear();
+        ProgramCode->readFile(CodeFile);
+        refreshCodeBrowser();
+        return true;
+    }
+    else if(!strncmp(command,"CLEAR",5)){
+        ProgramCode->clearLine();
+        context.clearContext();
+        ui->Result_Browser->clear();
+        ui->LAST_Browser->clear();
+        refreshCodeBrowser();
+        return true;
+    }
+    else if(!strncmp(command,"HELP",4)){
+        QDesktopServices::openUrl(QUrl::fromLocalFile("../Basic-interpreter/HELP.md"));
+        return true;
+    }
+    else if(!strncmp(command,"QUIT",4)){
+        this->close();
+        return true;
+    }
+    return false;
+}
+
+char *MainWindow::trim(std::string s)
+{
+    char *res;
+    res = strdup(s.c_str());
+    while(*res == ' ') ++res;
+
+    int i = strlen(res) - 1;
+    while(i >= 0 && res[i] == ' ') --i;
+    res[i + 1] = '\0';
+    return res;
 }
 
