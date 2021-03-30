@@ -12,6 +12,7 @@ program::~program(){
 LINE_PROPERTY program::checkLine(const std::string &text){
     std::string Id;
     int i = 0;
+    if(text [0] == '-') ++i;
     while(isdigit(text[i]) && i < text.size()){
         Id += text[i];
         ++i;
@@ -31,9 +32,12 @@ void program::readLine(const std::string &text){
         appendLine(text);
         break;
     case DELETE:
-        deleteLine(text);
+        if(!deleteLine(text)){
+           throw "Invalid Line Number";
+        }
         break;
     case INVALID:
+        throw "Invalid Expression or Command";
         break;
     }
 }
@@ -42,14 +46,17 @@ void program::appendLine(const std::string &text){
     buffer->appendLine(text);
 }
 
-void program::deleteLine(std::string Id){
-    buffer->deleteLine(Id);
+bool program::deleteLine(std::string Id){
+   return buffer->deleteLine(Id);
 }
 
 void program::jumpLine(int Id)
 {
     if(buffer->lineMap->count(Id)){
         curLine = buffer->lineMap->find(Id);
+    }
+    else {
+        throw "Wrong Line Number!";
     }
 }
 

@@ -6,7 +6,7 @@ statment::~statment()
     delete tokens;
 }
 
-void statment::initial(const std::string &line)
+void statment::initStat(const std::string &line)
 {
     tokens = new tokenizer;
     parserExp = new parser;
@@ -15,6 +15,9 @@ void statment::initial(const std::string &line)
     tokens->tokenVec->pop_front();
     if(stat == REM){
         handleREM(line);
+    }
+    else if(stat == ERR){
+        return;
     }
     else if(stat != IF && stat != END){
         parserExp->setParser(*(tokens->tokenVec));
@@ -42,6 +45,7 @@ void statment::executeStat(EvaluationContext &context)
     case END:
         break;
     default:
+        throw "Invalid Expression";
         break;
     }
 }
@@ -193,11 +197,17 @@ bool statment::handleIF(EvaluationContext &context)
             token1.append(*iter);
             ++iter;
         }
+        if(iter == tokens->tokenVec->end()){
+            throw "Missing Compare Operation!";
+        }
         op = iter->op;
         ++iter;
        while(iter != tokens->tokenVec->end() && iter->stat != THEN){
            token2.append(*iter);
            ++iter;
+       }
+       if(iter == tokens->tokenVec->end()){
+           throw "Missing THEN!";
        }
        ++iter;
        while(iter != tokens->tokenVec->end()){
@@ -230,8 +240,6 @@ bool statment::handleIF(EvaluationContext &context)
             doit = true;
         }
     }
-    default:
-        break;
     }
     if(doit){
         *(tokens->tokenVec) = thenToken;

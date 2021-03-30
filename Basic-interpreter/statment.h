@@ -13,7 +13,7 @@ class statment : public QObject
     Q_OBJECT
 public:
     ~statment();
-    void initial(const std::string &line);
+    void initStat(const std::string &line);
     void executeStat(EvaluationContext &context);
     void setIdentifier(EvaluationContext &context,int num);
     std::string printLAST();

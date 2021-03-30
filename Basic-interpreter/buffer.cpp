@@ -12,16 +12,23 @@ void Buffer::appendLine(const std::string &text)
     char *ptr;
     char *cText = (char *)text.data();
     int lineNum = strtol(cText,&ptr,10);
+    if(lineNum <= 0 || lineNum > 1000000){
+        throw "Invalid Line Number!";
+    }
     if(lineMap->count((lineNum))){
         lineMap->erase(lineNum);
     }
     lineMap->insert(std::pair<int,std::string>(lineNum,std::string(ptr)));
 }
 
-void Buffer::deleteLine(std::string Id)
+bool Buffer::deleteLine(std::string Id)
 {
     int lineNum = std::atoi(Id.c_str());
-    lineMap->erase(lineNum);
+    if(lineMap->count(lineNum)){
+        lineMap->erase(lineNum);
+        return true;
+    }
+    return false;
 }
 
 std::string Buffer::outputLine()

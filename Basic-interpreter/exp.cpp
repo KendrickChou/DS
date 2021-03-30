@@ -35,14 +35,12 @@ IdentifierExp::IdentifierExp(std::string name)
 
 int IdentifierExp::eval(EvaluationContext &context)
 {
-//    if(!context.isDefined(name)){
-//        std::cout << name << "is NOT defined!" << endl;
-//        return;
-//    }
+    if(!context.isDefined(name)){
+        throw "Undefined Identifier!";
+    }
     if(context.isDefined(name)){
         return context.getValue(name);
     }
-    return -1;
 }
 
 std::string IdentifierExp::toString()
@@ -97,13 +95,8 @@ int CompoundExp::eval(EvaluationContext &context)
     case DIV:
     {
         int left = this->getLHS()->eval(context);
-        try{
-            if(right == 0){
-                throw "Division by ZERO!";
-            }
-        }
-        catch(const char *msg){
-            std::cerr << msg << std::endl;
+        if(right == 0){
+            throw "Division by ZERO!";
         }
         return left / right;
     }

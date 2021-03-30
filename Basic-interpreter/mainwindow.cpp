@@ -37,35 +37,53 @@ MainWindow::~MainWindow()
 
 void MainWindow::runCode()
 {
-    printLAST();
     ProgramCode->initCurLine();
     while(true){
+        std::string curLineNum = ProgramCode->getLineNum();
         std::string curLine = ProgramCode->getCurLine();
         if(curLine == "REACH END") return;
         stat = new statment;
         connect(stat,stat->printNum,this,printResult);
         connect(stat,stat->inputVar,this,input);
         connect(stat,stat->GOTO_stat,this,GOTO_Line);
-        stat->initial(curLine);
-        stat->executeStat(context);
-        evalStat.setCurLine(ProgramCode->getLineNum());
+        try{
+            stat->initStat(curLine);
+            stat->executeStat(context);
+        }catch (const char* errMsg){
+            std::string err = std::string(errMsg) + " in " + curLineNum;
+            QMessageBox::critical(this,tr("Wrong!"),
+                                  tr(err.data()),QMessageBox::Close);
+            disconnect(stat,stat->GOTO_stat,this,GOTO_Line);
+            disconnect(stat,stat->inputVar,this,input);
+            disconnect(stat,stat->printNum,this,printResult);
+            delete stat;
+            return;
+        }
+        evalStat.setCurLine(curLineNum);
         context.copySymbolTable(evalStat.symbolTable);
         disconnect(stat,stat->GOTO_stat,this,GOTO_Line);
         disconnect(stat,stat->inputVar,this,input);
         disconnect(stat,stat->printNum,this,printResult);
         delete stat;
     }
+    printLAST();
 }
 
 void MainWindow::getInput()
 {
     std::string inputLine = ui->Input_Line->text().toStdString();
+    if(inputLine == "") return;
     if(checkAndexecuteCmd(inputLine)){
         ui->Input_Line->clear();
         return;
     }
     else{
-        ProgramCode->readLine(inputLine);
+        try{
+            ProgramCode->readLine(inputLine);
+        }catch (const char* errMsg){
+            QMessageBox::critical(this,tr("Wrong!"),
+                                  tr(errMsg),QMessageBox::Close);
+        }
         refreshCodeBrowser();
         ui->Input_Line->clear();
     }
@@ -80,11 +98,27 @@ void MainWindow::printResult(int pNum)
 
 void MainWindow::input()
 {
+    bool flag = true;
     bool ok = false;
-    QString text = QInputDialog::getText(this,tr("Input Identifier"),
-                                         "Please input your Identifier value"
-                                         ,QLineEdit::Normal,"?",&ok);
-    int inputNum = text.QString::toInt();
+    QString text;
+    int inputNum;
+    do{
+        text = QInputDialog::getText(this,tr("Input Identifier"),
+                                             "Please input your Identifier value"
+                                             ,QLineEdit::Normal,"?",&ok);
+        text.trimmed();
+        inputNum = text.QString::toInt(&flag);
+        if(!flag) {
+           int ret = QMessageBox::critical(this,tr("Wrong!"),
+                                  tr("Please Input an integer!"),
+                                  QMessageBox::Ok | QMessageBox::Abort,
+                                  QMessageBox::Ok);
+           if(ret == QMessageBox::Abort){
+               throw "Wrong Input!";
+           }
+        }
+    }while(!flag);
+
 
 
     stat->setIdentifier(context,inputNum);
@@ -110,7 +144,7 @@ void MainWindow::printLAST()
         if(curLine == "REACH END") break;
         std::string LAST_Line = ProgramCode->getLineNum();
         LAST_Line += " ";
-        printLASTStat->initial(curLine);
+        printLASTStat->initStat(curLine);
         LAST_Line += printLASTStat->printLAST();
         ui->LAST_Browser->append(QString::fromStdString(LAST_Line));
     }

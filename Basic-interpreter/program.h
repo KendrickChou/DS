@@ -20,7 +20,7 @@ public:
 
     void readLine(const std::string &text);
     void appendLine(const std::string &text);
-    void deleteLine(std::string Id);
+    bool deleteLine(std::string Id);
     LINE_PROPERTY checkLine(const std::string &text);
     std::string outputLine();
     std::string getCurLine();

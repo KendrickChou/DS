@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QFile>
 #include <qinputdialog.h>
+#include <QMessageBox>
 #include <QDesktopServices>
 #include "program.h"
 #include "statment.h"

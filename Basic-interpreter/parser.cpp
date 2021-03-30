@@ -41,10 +41,13 @@ void parser::deleteTree(Expression *root)
 
 void parser::parseExp()
 {
+    if(parseTokens.empty()){
+        throw "Empty Expression!";
+    }
     for(int i = 0;i < parseTokens.size();++i){
         switch (parseTokens[i].type) {
         case STAT:
-            printf("Wrong Expression!");
+            throw "Wrong Statement!";
             break;
         case OP:
         {
