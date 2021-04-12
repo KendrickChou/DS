@@ -6,22 +6,23 @@ statment::~statment()
     delete tokens;
 }
 
-void statment::initStat(const std::string &line)
+bool statment::initStat(const std::string &line)
 {
     tokens = new tokenizer;
     parserExp = new parser;
     tokens->tokenizeLine(line);
-    this->stat = (tokens->tokenVec->begin())->stat;
-    tokens->tokenVec->pop_front();
+    this->stat = (tokens->tokenVec.begin())->stat;
+    tokens->tokenVec.pop_front();
     if(stat == REM){
         handleREM(line);
     }
     else if(stat == ERR){
-        return;
+        return false;
     }
     else if(stat != IF && stat != END){
-        parserExp->setParser(*(tokens->tokenVec));
+        parserExp->setParser(tokens->tokenVec);
     }
+    return true;
 }
 
 void statment::executeStat(EvaluationContext &context)
@@ -43,6 +44,9 @@ void statment::executeStat(EvaluationContext &context)
         handleIF(context);
         break;
     case END:
+        handleEND(context);
+        break;
+    case REM:
         break;
     default:
         throw "Invalid Expression";
@@ -56,9 +60,19 @@ void statment::setIdentifier(EvaluationContext &context, int num)
     context.setValue(Id,num);
 }
 
+void statment::clearStat()
+{
+    if(!this->tokens){
+        delete this->tokens;
+    }
+    if(!parserExp){
+        delete parserExp;
+    }
+}
+
 std::string statment::printLAST()
 {
-    std::string LAST_String;
+    std::string LAST_String = "";
     switch (this->stat) {
     case REM:
     {
@@ -71,14 +85,14 @@ std::string statment::printLAST()
     case INPUT:
     {
         LAST_String += "INPUT\n    ";
-        LAST_String += tokens->tokenVec->begin()->var;
+        LAST_String += tokens->tokenVec.begin()->var;
         LAST_String += "\n";
         break;
     }
     case GOTO:
     {
         LAST_String += "GOTO\n    ";
-        LAST_String += std::to_string(tokens->tokenVec->begin()->num);
+        LAST_String += std::to_string(tokens->tokenVec.begin()->num);
         LAST_String += "\n";
         break;
     }
@@ -99,22 +113,26 @@ std::string statment::printLAST()
     {
         parser Exp1,Exp2;
         QVector<token> token1,token2,thenToken;
-        QVector<token>::iterator iter = tokens->tokenVec->begin();
+        QVector<token>::iterator iter = tokens->tokenVec.begin();
         OPERATION op;
         bool doit = false;
-        if(iter != tokens->tokenVec->end()){
-            while(iter != tokens->tokenVec->end() && iter->op != GT && iter->op != LT && iter->op != EQ){
+        if(iter != tokens->tokenVec.end()){
+            while(iter != tokens->tokenVec.end() && iter->op != GT && iter->op != LT && iter->op != EQ){
                 token1.append(*iter);
                 ++iter;
             }
+            if(iter == tokens->tokenVec.end()) return "Error\n";
             op = iter->op;
             ++iter;
-           while(iter != tokens->tokenVec->end() && iter->stat != THEN){
+           while(iter != tokens->tokenVec.end() && iter->stat != THEN){
                token2.append(*iter);
                ++iter;
            }
+           if(iter == tokens->tokenVec.end()){
+               return "Error\n";
+           }
            ++iter;
-           while(iter != tokens->tokenVec->end()){
+           while(iter != tokens->tokenVec.end()){
                thenToken.append(*iter);
                ++iter;
            }
@@ -122,7 +140,7 @@ std::string statment::printLAST()
         Exp1.setParser(token1);
         Exp2.setParser(token2);
         LAST_String += "IF  THEN\n";
-        LAST_String += Exp1.printLAST();
+        std::string temp = Exp1.printLAST();
         LAST_String += "    ";
         switch (op) {
         case EQ:
@@ -135,6 +153,7 @@ std::string statment::printLAST()
             LAST_String += "<\n";
             break;
         }
+        LAST_String += temp;
         LAST_String += Exp2.printLAST();
         LAST_String += "    ";
         LAST_String += std::to_string(thenToken.begin()->num);
@@ -189,28 +208,28 @@ bool statment::handleIF(EvaluationContext &context)
 {
     parser Exp1,Exp2;
     QVector<token> token1,token2,thenToken;
-    QVector<token>::iterator iter = tokens->tokenVec->begin();
+    QVector<token>::iterator iter = tokens->tokenVec.begin();
     OPERATION op;
     bool doit = false;
-    if(iter != tokens->tokenVec->end()){
-        while(iter != tokens->tokenVec->end() && iter->op != GT && iter->op != LT && iter->op != EQ){
+    if(iter != tokens->tokenVec.end()){
+        while(iter != tokens->tokenVec.end() && iter->op != GT && iter->op != LT && iter->op != EQ){
             token1.append(*iter);
             ++iter;
         }
-        if(iter == tokens->tokenVec->end()){
+        if(iter == tokens->tokenVec.end()){
             throw "Missing Compare Operation!";
         }
         op = iter->op;
         ++iter;
-       while(iter != tokens->tokenVec->end() && iter->stat != THEN){
+       while(iter != tokens->tokenVec.end() && iter->stat != THEN){
            token2.append(*iter);
            ++iter;
        }
-       if(iter == tokens->tokenVec->end()){
+       if(iter == tokens->tokenVec.end()){
            throw "Missing THEN!";
        }
        ++iter;
-       while(iter != tokens->tokenVec->end()){
+       while(iter != tokens->tokenVec.end()){
            thenToken.append(*iter);
            ++iter;
        }
@@ -242,9 +261,14 @@ bool statment::handleIF(EvaluationContext &context)
     }
     }
     if(doit){
-        *(tokens->tokenVec) = thenToken;
+        tokens->tokenVec = thenToken;
         parserExp->setParser(thenToken);
         this->handleGOTO(context);
     }
     return true;
+}
+
+bool statment::handleEND(EvaluationContext &context)
+{
+    emit end();
 }

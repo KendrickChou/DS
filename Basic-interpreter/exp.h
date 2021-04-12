@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <cmath>
+#include <iostream>
 
 class EvaluationContext;
 
@@ -12,8 +13,8 @@ enum ExpressionType {ERR_Type ,CONSTANT , IDENTIFIER , COMPOUND};
 
 class Expression{
 public:
-    Expression() {}
-    ~Expression() {}
+    Expression(){}
+    virtual ~Expression(){}
     virtual int eval(EvaluationContext &context) = 0;
     virtual std::string toString() = 0;
     virtual ExpressionType type() = 0;
@@ -27,6 +28,9 @@ public:
 
 class ConstantExp:public Expression{
 public:
+    ConstantExp(){}
+    ~ConstantExp();
+
     ConstantExp(int val);
 
     virtual int eval(EvaluationContext &context);
@@ -41,6 +45,8 @@ private:
 
 class IdentifierExp:public Expression{
 public:
+    IdentifierExp(){}
+    ~IdentifierExp();
     IdentifierExp(std::string name);
 
     virtual int eval(EvaluationContext &context);
@@ -55,7 +61,7 @@ private:
 class CompoundExp: public Expression{
 public:
     CompoundExp(OPERATION op, Expression *rhs, Expression *lhs);
-    virtual ~CompoundExp() {}
+    ~CompoundExp();
 
     virtual int eval(EvaluationContext &context);
     virtual std::string toString();
@@ -77,6 +83,7 @@ public:
     bool isDefined(std::string var);
     void clearContext();
     void copySymbolTable(std::map<std::string,int> &dest);
+    void mergeContext(EvaluationContext mergedcontext);
 
 private:
     std::map<std::string, int> symbolTable;

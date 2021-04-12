@@ -13,15 +13,16 @@ class statment : public QObject
     Q_OBJECT
 public:
     ~statment();
-    void initStat(const std::string &line);
+    bool initStat(const std::string &line);
     void executeStat(EvaluationContext &context);
     void setIdentifier(EvaluationContext &context,int num);
+    void clearStat();
     std::string printLAST();
 
 private:
     STATE stat;
-    tokenizer *tokens;
-    parser *parserExp;
+    tokenizer *tokens = nullptr;
+    parser *parserExp = nullptr;
     int inputNum;
     QQueue<std::string> REM_Queue;
     bool handleREM(const std::string &line);
@@ -30,10 +31,13 @@ private:
     bool handleINPUT(EvaluationContext &context);
     bool handleGOTO(EvaluationContext &context);
     bool handleIF(EvaluationContext &context);
+    bool handleEND(EvaluationContext &context);
+
 signals:
     void printNum(int);
     void inputVar();
     void GOTO_stat(int);
+    void end();
 private slots:
 };
 

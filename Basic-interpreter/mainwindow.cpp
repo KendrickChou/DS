@@ -7,6 +7,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     ProgramCode = new program;
+    stat = new statment;
+    connect(stat,stat->printNum,this,printResult);
+    connect(stat,stat->inputVar,this,input);
+    connect(stat,stat->GOTO_stat,this,GOTO_Line);
+    connect(stat,stat->end,this,getEND);
 
     connect(ui->Input_Line,ui->Input_Line->returnPressed,
             this,getInput);
@@ -22,8 +27,13 @@ MainWindow::MainWindow(QWidget *parent)
             this,[=](){
         QFile CodeFile(QFileDialog::getOpenFileName(this,tr("Open Code File"),
               "C:\myCode\DS",tr("Text files (*.txt)")));
-        context.clearContext();
-        ProgramCode->readFile(CodeFile);
+        try{
+            ProgramCode->readFile(CodeFile);
+        }catch (const char *errMsg){
+            QMessageBox::critical(this,tr("Wrong!"),
+                                  tr(errMsg),QMessageBox::Close);
+            return;
+        }
         refreshCodeBrowser();
     });
     connect(ui->Run_Btn,ui->Run_Btn->clicked,this,runCode);
@@ -39,34 +49,26 @@ void MainWindow::runCode()
 {
     ProgramCode->initCurLine();
     while(true){
-        std::string curLineNum = ProgramCode->getLineNum();
         std::string curLine = ProgramCode->getCurLine();
-        if(curLine == "REACH END") return;
-        stat = new statment;
-        connect(stat,stat->printNum,this,printResult);
-        connect(stat,stat->inputVar,this,input);
-        connect(stat,stat->GOTO_stat,this,GOTO_Line);
+        std::string curLineNum = ProgramCode->getLineNum();
+        if(curLine == "REACH END") break;
         try{
             stat->initStat(curLine);
             stat->executeStat(context);
+            stat->clearStat();
+            if(END == 1){
+                END = 0;
+                break;
+            }
         }catch (const char* errMsg){
             std::string err = std::string(errMsg) + " in " + curLineNum;
             QMessageBox::critical(this,tr("Wrong!"),
                                   tr(err.data()),QMessageBox::Close);
-            disconnect(stat,stat->GOTO_stat,this,GOTO_Line);
-            disconnect(stat,stat->inputVar,this,input);
-            disconnect(stat,stat->printNum,this,printResult);
-            delete stat;
-            return;
+            break;
         }
-        evalStat.setCurLine(curLineNum);
-        context.copySymbolTable(evalStat.symbolTable);
-        disconnect(stat,stat->GOTO_stat,this,GOTO_Line);
-        disconnect(stat,stat->inputVar,this,input);
-        disconnect(stat,stat->printNum,this,printResult);
-        delete stat;
     }
     printLAST();
+    return;
 }
 
 void MainWindow::getInput()
@@ -74,6 +76,10 @@ void MainWindow::getInput()
     std::string inputLine = ui->Input_Line->text().toStdString();
     if(inputLine == "") return;
     if(checkAndexecuteCmd(inputLine)){
+        ui->Input_Line->clear();
+        return;
+    }
+    else if (checkGlobalStatement(inputLine)){
         ui->Input_Line->clear();
         return;
     }
@@ -100,7 +106,7 @@ void MainWindow::input()
 {
     bool flag = true;
     bool ok = false;
-    QString text;
+    QString text = "";
     int inputNum;
     do{
         text = QInputDialog::getText(this,tr("Input Identifier"),
@@ -119,13 +125,16 @@ void MainWindow::input()
         }
     }while(!flag);
 
-
-
     stat->setIdentifier(context,inputNum);
 }
 
 void MainWindow::GOTO_Line(int lineNum){
     ProgramCode->jumpLine(lineNum);
+}
+
+void MainWindow::getEND()
+{
+    END = 1;
 }
 
 void MainWindow::refreshCodeBrowser(){
@@ -141,12 +150,21 @@ void MainWindow::printLAST()
     while(true){
         statment *printLASTStat = new statment;
         std::string curLine = ProgramCode->getCurLine();
-        if(curLine == "REACH END") break;
         std::string LAST_Line = ProgramCode->getLineNum();
+        if(curLine == "REACH END") break;
         LAST_Line += " ";
-        printLASTStat->initStat(curLine);
-        LAST_Line += printLASTStat->printLAST();
+        try{
+            bool flag = printLASTStat->initStat(curLine);
+            if(!flag){
+                LAST_Line += "Error\n";
+            }
+            else
+                LAST_Line += printLASTStat->printLAST();
+        }catch (const char* erMsg){
+             LAST_Line += "Error\n";
+        }
         ui->LAST_Browser->append(QString::fromStdString(LAST_Line));
+        delete printLASTStat;
     }
 }
 
@@ -159,9 +177,8 @@ bool MainWindow::checkAndexecuteCmd(std::string cmd)
     }
     else if(!strncmp(command,"LOAD",4)){
         QFile CodeFile(QFileDialog::getOpenFileName(this,tr("Open Code File"),
-              "C:\myCode\DS",tr("Text files (*.txt)")));
+              "",tr("Text files (*.txt)")));
         ProgramCode->clearLine();
-        context.clearContext();
         ui->Result_Browser->clear();
         ProgramCode->readFile(CodeFile);
         refreshCodeBrowser();
@@ -176,7 +193,7 @@ bool MainWindow::checkAndexecuteCmd(std::string cmd)
         return true;
     }
     else if(!strncmp(command,"HELP",4)){
-        QDesktopServices::openUrl(QUrl::fromLocalFile("../Basic-interpreter/HELP.md"));
+        QDesktopServices::openUrl(QUrl::fromLocalFile("../Basic-interpreter/HELP.pdf"));
         return true;
     }
     else if(!strncmp(command,"QUIT",4)){
@@ -198,3 +215,22 @@ char *MainWindow::trim(std::string s)
     return res;
 }
 
+bool MainWindow::checkGlobalStatement(std::string statline)
+{
+    const char *statLine = trim(statline);
+    if(!strncmp(statLine,"INPUT",5) || !strncmp(statLine,"PRINT",5)
+            || !strncmp(statLine,"LET",3)){
+        try{
+            stat->clearStat();
+            stat->initStat(statLine);
+            stat->executeStat(context);
+        }catch (const char* errMsg){
+            std::string err = std::string(errMsg) + " in " + statLine;
+            QMessageBox::critical(this,tr("Wrong!"),
+                                  tr(err.data()),QMessageBox::Close);
+            return true;
+        }
+        return true;
+    }
+    return false;
+}

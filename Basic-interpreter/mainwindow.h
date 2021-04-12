@@ -26,20 +26,23 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    program *ProgramCode;
-    statment *stat;
+    program *ProgramCode = nullptr;
+    statment *stat = nullptr;
     EvaluationContext context;
     EvalState evalStat;
+    bool END = 0;
     void refreshCodeBrowser();
     void printLAST();
     bool checkAndexecuteCmd(std::string cmd);
     char *trim(std::string s);
+    bool checkGlobalStatement(std::string statline);
 private slots:
     void runCode();
     void getInput();
     void printResult(int);
     void input();
     void GOTO_Line(int);
+    void getEND();
 signals:
 
 };

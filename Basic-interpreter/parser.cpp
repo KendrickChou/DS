@@ -2,14 +2,13 @@
 
 parser::parser()
 {
-    root = NULL;
+    root = nullptr;
 }
 
 void parser::setParser(QVector<token> parseTokens)
 {
     this->parseTokens.clear();
     this->parseTokens = parseTokens;
-
     this->parseExp();
 }
 
@@ -20,21 +19,22 @@ void parser::clearParser()
 parser::~parser()
 {
     deleteTree(root);
+    root = nullptr;
 }
 
-void parser::deleteTree(Expression *root)
+void parser::deleteTree(Expression *Root)
 {
-    if(root == NULL) return;
-    switch (root->type()){
+    if(Root == nullptr) return;
+    switch (Root->type()){
     case CONSTANT:
     case IDENTIFIER:
-        delete root;
-        break;
+        delete Root;
+        return;
     case COMPOUND:{
-        deleteTree(root->getLHS());
-        deleteTree(root->getRHS());
-        delete root;
-        break;
+        deleteTree(Root->getLHS());
+        deleteTree(Root->getRHS());
+        delete Root;
+        return;
     }
     }
 }
@@ -60,10 +60,17 @@ void parser::parseExp()
         }
     }
     while(!operators.empty()){
-        CompoundExp *compound = new CompoundExp(operators.pop(),operands.pop(),operands.pop());
+        if(operands.size() < 2){
+            throw "Wrong Arithmatic Expression!";
+        }
+        Expression *compound = new CompoundExp(operators.pop(),operands.pop(),operands.pop());
         operands.append(compound);
     }
-    root = operands.pop();
+    if(operands.size() == 1){
+        root = operands.pop();
+    }else{
+        throw "Wrong Arithmetic Expression!";
+    }
 }
 
 int parser::evalExp(EvaluationContext &context)
@@ -151,13 +158,13 @@ void parser::handleOperand(token operand)
     switch (operand.type) {
     case NUM:
     {
-        ConstantExp *constant =  new ConstantExp(operand.num);
+        Expression *constant =  new ConstantExp(operand.num);
         operands.append(constant);
         break;
     }
     case VAR:
     {
-        IdentifierExp *var = new IdentifierExp(operand.var);
+        Expression *var = new IdentifierExp(operand.var);
         operands.append(var);
         break;
     }
@@ -173,7 +180,7 @@ void parser::handleOperator(OPERATION op)
     case SUB:
     {
         while(!operators.empty() && operators.top() != LP && operators.top() != EQ){
-            CompoundExp *compound = new CompoundExp(operators.pop(),operands.pop(),operands.pop());
+            Expression *compound = new CompoundExp(operators.pop(),operands.pop(),operands.pop());
             operands.append(compound);
         }
         operators.append(op);
@@ -183,7 +190,7 @@ void parser::handleOperator(OPERATION op)
     case DIV:
     {
         while(!operators.empty() && (operators.top() == MUL || operators.top() == DIV || operators.top() == EXP)){
-            CompoundExp *compound = new CompoundExp(operators.pop(),operands.pop(),operands.pop());
+            Expression *compound = new CompoundExp(operators.pop(),operands.pop(),operands.pop());
             operands.append(compound);
         }
         operators.append(op);
@@ -197,7 +204,7 @@ void parser::handleOperator(OPERATION op)
     case RP:
     {
         while(operators.top() != LP){
-            CompoundExp *compound = new CompoundExp(operators.pop(),operands.pop(),operands.pop());
+            Expression *compound = new CompoundExp(operators.pop(),operands.pop(),operands.pop());
             operands.append(compound);
         }
         operators.pop();

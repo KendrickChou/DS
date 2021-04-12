@@ -13,7 +13,7 @@ void Buffer::appendLine(const std::string &text)
     char *cText = (char *)text.data();
     int lineNum = strtol(cText,&ptr,10);
     if(lineNum <= 0 || lineNum > 1000000){
-        throw "Invalid Line Number!";
+        throw "Unexpected statement in file!";
     }
     if(lineMap->count((lineNum))){
         lineMap->erase(lineNum);

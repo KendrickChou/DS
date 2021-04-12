@@ -69,7 +69,6 @@ std::string program::getCurLine()
     std::string line;
     if(curLine != buffer->lineMap->end()){
         line = curLine->second;
-        ++curLine;
     }
     else line = "REACH END";
     return line;
@@ -77,7 +76,11 @@ std::string program::getCurLine()
 
 std::string program::getLineNum()
 {
-    return std::to_string(curLine->first);
+    if(curLine != buffer->lineMap->end()){
+        return std::to_string((curLine++)->first);
+    }else{
+        return "REACH END";
+    }
 }
 
 void program::initCurLine()
@@ -97,6 +100,8 @@ void program::readFile(QFile &CodeFile)
     file.open(FileName);
     std::string line;
     while(getline(file,line)){
+        if(line == "")
+            continue;
         buffer->appendLine(line);
     }
     file.close();

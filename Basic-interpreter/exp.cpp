@@ -1,6 +1,11 @@
 #include "exp.h"
 #include <iostream>
 
+ConstantExp::~ConstantExp()
+{
+
+}
+
 ConstantExp::ConstantExp(int val)
 {
     this->value = val;
@@ -27,6 +32,11 @@ int ConstantExp::getConstantValue()
 }
 
 //***************ConstantExp*********************//
+
+IdentifierExp::~IdentifierExp()
+{
+
+}
 
 IdentifierExp::IdentifierExp(std::string name)
 {
@@ -65,6 +75,10 @@ CompoundExp::CompoundExp(OPERATION op, Expression *rhs, Expression *lhs)
     this->op = op;
     this->lhs = lhs;
     this->rhs = rhs;
+}
+
+CompoundExp::~CompoundExp()
+{
 }
 
 int CompoundExp::eval(EvaluationContext &context)
@@ -166,7 +180,7 @@ Expression *CompoundExp::getRHS()
 
 int Expression::getConstantValue()
 {
-    return -99999;
+    return 0;
 }
 
 std::string Expression::getIdentifierName()
@@ -220,6 +234,18 @@ void EvaluationContext::clearContext()
 void EvaluationContext::copySymbolTable(std::map<std::string, int> &dest)
 {
     dest = symbolTable;
+}
+
+void EvaluationContext::mergeContext(EvaluationContext mergedcontext)
+{
+    std::map<std::string,int> mergedSymTable;
+    mergedcontext.copySymbolTable(mergedSymTable);
+    std::map<std::string,int>::iterator iter = mergedSymTable.begin();
+    while(iter != mergedSymTable.end()){
+        this->setValue(iter->first,iter->second);
+        ++iter;
+    }
+    return;
 }
 
 
