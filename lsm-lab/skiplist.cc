@@ -10,20 +10,30 @@ SkipList::~SkipList (){
 }
 
 size_t SkipList::size(){
-    node *iter = head;
-    while(iter->down){
-        iter = iter->down;
-    }
-    size_t res = 0;
-    iter = iter->next;
-    while(iter){
-        ++res;
-        iter = iter->next;
-    }
-    return res;
+    return listSize;
 }
 
-node* SkipList::find(int64_t key){
+/*
+ * updateFileSize:
+ * if only newValue == NULL, means delete a node from list
+ * if only oldValue == NULL, means add a node from list
+ * if both != NULL, means update a node from list
+*/
+void SkipList::updateFileSize(const std::string *newValue,const std::string *oldValue){
+    if(!oldValue){
+        fileSize += newValue->size() * 8 + INDEXSIZE;
+    }
+    else if(!newValue){
+        fileSize -= (oldValue->size() * 8 + INDEXSIZE);
+        return;
+    }
+    else{
+        fileSize += (newValue->size() - oldValue->size()) * 8;
+    }
+    return;
+}
+
+node* SkipList::find(uint64_t key){
     node *iter = head;
     while(iter){
         while(iter->next && iter->next->key() < key){
@@ -35,19 +45,20 @@ node* SkipList::find(int64_t key){
     return nullptr;
 }
 
-std::string SkipList::get(int64_t key){
+std::string SkipList::get(uint64_t key){
     node *target = this->find(key);
     if(target) return target->value();
     return "";
 }
 
-void SkipList::put(int64_t key,std::string value){
+void SkipList::put(uint64_t key,std::string value){
     std::vector<node *> pathList;   //store search path
     node *iter;
 
     //if exist, override it
     iter = find(key);
     if(iter){
+        updateFileSize(&value,&iter->data.second);
         while(iter){
             iter->data.second = value;
             iter = iter->down;
@@ -100,14 +111,17 @@ void SkipList::put(int64_t key,std::string value){
         head = newHead;
     }
 
+    ++listSize;
+    updateFileSize(&value,nullptr);
     delete tail;
     return;
 }
 
-bool SkipList::del(int64_t key){
+bool SkipList::del(uint64_t key){
     node *iter = this->find(key);
 
     if(!iter) return false;
+    updateFileSize(nullptr,&iter->data.second);
     node *delNode,*preNode,*nextNode;
     while(iter){
         delNode = iter;
@@ -123,6 +137,7 @@ bool SkipList::del(int64_t key){
             delete delNode;
         }
     }
+    --listSize;
     return true;
 }
 
@@ -139,6 +154,8 @@ void SkipList::reset(){
         delete iter;
     }
     head = new node;
+    listSize = 0;
+    fileSize = BASESIZE;
 }
 
 void SkipList::show(){
@@ -153,4 +170,25 @@ void SkipList::show(){
         iter = headIter->down;
         headIter = iter;
     }
+    std::cout << "listSize: " << listSize << "  fileSize: " << fileSize << '\n';
+}
+
+std::vector<std::pair<uint64_t,std::string>>* SkipList::getAll(){
+
+    if(!head->next) return nullptr;
+
+    std::vector<std::pair<uint64_t,std::string>>* vec 
+         = new std::vector<std::pair<uint64_t,std::string>>;
+    node *iter = head;
+
+    while(iter->down){
+        iter = iter->down;
+    }
+
+    while(iter->next){
+        vec->push_back(iter->next->data);
+        iter = iter->next;
+    }
+
+    return vec;
 }
