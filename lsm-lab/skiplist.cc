@@ -21,14 +21,14 @@ size_t SkipList::size(){
 */
 void SkipList::updateFileSize(const std::string *newValue,const std::string *oldValue){
     if(!oldValue){
-        fileSize += newValue->size() * 8 + INDEXSIZE;
+        fileSize += newValue->size() + INDEXSIZE;
     }
     else if(!newValue){
-        fileSize -= (oldValue->size() * 8 + INDEXSIZE);
+        fileSize -= (oldValue->size() + INDEXSIZE);
         return;
     }
     else{
-        fileSize += (newValue->size() - oldValue->size()) * 8;
+        fileSize += (newValue->size() - oldValue->size());
     }
     return;
 }
@@ -51,7 +51,7 @@ std::string SkipList::get(uint64_t key){
     return "";
 }
 
-void SkipList::put(uint64_t key,std::string value){
+bool SkipList::put(uint64_t key,std::string value){
     std::vector<node *> pathList;   //store search path
     node *iter;
 
@@ -59,12 +59,16 @@ void SkipList::put(uint64_t key,std::string value){
     iter = find(key);
     if(iter){
         updateFileSize(&value,&iter->data.second);
+        if(fileSize > MAXSIZE) return false;
         while(iter){
             iter->data.second = value;
             iter = iter->down;
         }
-        return;
+        return true;
     }
+
+    updateFileSize(&value,nullptr);
+    if(fileSize > MAXSIZE) return false;
 
     iter = head;
     //get path
@@ -87,6 +91,7 @@ void SkipList::put(uint64_t key,std::string value){
             break;
         }
         node *putNode = new node(nullptr,nullptr,nullptr, key,value);
+        srand(time(NULL));
         continueInsert = (rand()&1);    //50% continue input
         iter = pathList[i];
         node *nextNode = iter->next;
@@ -112,9 +117,8 @@ void SkipList::put(uint64_t key,std::string value){
     }
 
     ++listSize;
-    updateFileSize(&value,nullptr);
     delete tail;
-    return;
+    return true;
 }
 
 bool SkipList::del(uint64_t key){
@@ -177,8 +181,7 @@ std::vector<std::pair<uint64_t,std::string>>* SkipList::getAll(){
 
     if(!head->next) return nullptr;
 
-    std::vector<std::pair<uint64_t,std::string>>* vec 
-         = new std::vector<std::pair<uint64_t,std::string>>;
+    std::vector<PAIR>* vec = new std::vector<PAIR>;
     node *iter = head;
 
     while(iter->down){

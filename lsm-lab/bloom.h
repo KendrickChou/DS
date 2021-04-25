@@ -8,13 +8,12 @@
 #include <vector>
 #include <cstring>
 #include "MurmurHash3.h"
-
-const static size_t SIZE = 5;
+#include "global.h"
 
 class bloom
 {
 private:
-    std::bitset<SIZE> filter;
+    std::bitset<BLOOM_SIZE> filter;
 
     unsigned int* hashKey(uint64_t key);
 
@@ -24,20 +23,21 @@ public:
 
     void addKey(uint64_t key);
     bool mayContain(uint64_t key);
+    char* bitset_to_bytes();
 
-    friend std::ostream & operator <<(std::ostream & os, const bloom &Filter);
+    friend std::ostream & operator <<(std::ostream & os, bloom &Filter);
     friend std::istream & operator >>(std::istream & is, bloom &Filter);
 };
 
-bloom::bloom()
+inline bloom::bloom()
 {
 }
 
-bloom::~bloom()
+inline bloom::~bloom()
 {
 }
 
-unsigned int* bloom::hashKey(uint64_t key){
+inline unsigned int* bloom::hashKey(uint64_t key){
     unsigned int *hash = new unsigned int [4];
     memset(hash,0,sizeof(unsigned int)*4);
 
@@ -46,22 +46,34 @@ unsigned int* bloom::hashKey(uint64_t key){
     return hash;
 }
 
-void bloom::addKey(uint64_t key){
+inline char* bloom::bitset_to_bytes(){
+    size_t CHAR_SIZE = BLOOM_SIZE >> 3;
+    char *bloom_in_char = new char [CHAR_SIZE];
+    memset(bloom_in_char,0,CHAR_SIZE * sizeof(char));
+
+    for(int i = 0; i < BLOOM_SIZE; ++i){
+        bloom_in_char[i >> 3] |= ((filter[i]) << (i & 7));
+    }
+
+    return bloom_in_char;
+}
+
+inline void bloom::addKey(uint64_t key){
     unsigned int *hash = hashKey(key);
 
     for(int i = 0;i < 4;++i){
-        this->filter[(hash[i] % SIZE)] = true;
+        this->filter[(hash[i] % BLOOM_SIZE)] = true;
     }
 
     delete hash;
     return;
 }
 
-bool bloom::mayContain(uint64_t key){
+inline bool bloom::mayContain(uint64_t key){
     unsigned int *hash = hashKey(key);
 
     for(int i = 0;i < 4;++i){
-        if(!this->filter[(hash[i] % SIZE)]){
+        if(!this->filter[(hash[i] % BLOOM_SIZE)]){
             return false;
         }
     }
@@ -70,15 +82,15 @@ bool bloom::mayContain(uint64_t key){
     return true;
 }
 
-std::ostream & operator <<(std::ostream & os, const bloom &Filter){
+inline std::ostream & operator <<(std::ostream & os, bloom &Filter){
     os << Filter.filter;
     return os;
 }
 
-std::istream & operator >>(std::istream & is,bloom &Filter){
-    char filter_string[SIZE + 1];
-    is.get(filter_string,SIZE + 1);
-    std::bitset<SIZE> newFilter{std::string(filter_string)};
+inline std::istream & operator >>(std::istream & is,bloom &Filter){
+    char filter_string[BLOOM_SIZE + 1];
+    is.get(filter_string,BLOOM_SIZE + 1);
+    std::bitset<BLOOM_SIZE> newFilter{std::string(filter_string)};
     Filter.filter.reset();
     Filter.filter |= newFilter;
     return is;

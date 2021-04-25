@@ -3,12 +3,14 @@
 
 KVStore::KVStore(const std::string &dir): KVStoreAPI(dir)
 {
-	memtable = new SkipList;
+	memTable = new SkipList;
+	diskManager = new diskmanager;
 }
 
 KVStore::~KVStore()
 {
-	delete memtable;
+	delete memTable;
+	delete diskManager;
 }
 
 /**
@@ -17,7 +19,14 @@ KVStore::~KVStore()
  */
 void KVStore::put(uint64_t key, const std::string &s)
 {
-	memtable->put(key,s);
+	if(!memTable->put(key,s)){
+	    std::string filePath = ("../level/level0/" + std::to_string(TIMESTAMP) + "-0.sst");
+	    SSTable *newTable = new SSTable(filePath,*(memTable->getAll()));
+        diskManager->insert(newTable);
+
+	    memTable->reset();
+	    memTable->put(key,s);
+	}
 }
 /**
  * Returns the (string) value of the given key.
@@ -25,7 +34,17 @@ void KVStore::put(uint64_t key, const std::string &s)
  */
 std::string KVStore::get(uint64_t key)
 {
-	return memtable->get(key);
+    std::string value = memTable->get(key);
+
+    if(value.empty()){
+        value = diskManager->get(key);
+    }
+
+    if(value == "~DELETE~"){
+        value = "";
+    }
+
+    return value;
 }
 /**
  * Delete the given key-value pair if it exists.
@@ -33,7 +52,19 @@ std::string KVStore::get(uint64_t key)
  */
 bool KVStore::del(uint64_t key)
 {
-	return memtable->del(key);
+    std::string delVal = get(key);
+    if(delVal.empty()){
+        std::string value = "~DELETE~";
+        put(key,value);
+        return false;
+    }
+
+    bool res = memTable->del(key);
+
+    std::string value = "~DELETE~";
+    put(key,value);
+
+    return true;
 }
 
 /**
@@ -42,5 +73,6 @@ bool KVStore::del(uint64_t key)
  */
 void KVStore::reset()
 {
-	memtable->reset();
+//	memTable->reset();
+//	diskManager->reset();
 }

@@ -2,11 +2,13 @@
 
 #include "kvstore_api.h"
 #include "skiplist.h"
+#include "diskmanager.h"
 
 class KVStore : public KVStoreAPI {
 	// You can add your implementation here
 private:
-	SkipList *memtable;
+	SkipList *memTable;
+	diskmanager *diskManager;
 public:
 	KVStore(const std::string &dir);
 
