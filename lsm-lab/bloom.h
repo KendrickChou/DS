@@ -45,8 +45,23 @@ inline char* bloom::bitset_to_bytes(){
     char *bloom_in_char = new char [CHAR_SIZE];
     memset(bloom_in_char,0,CHAR_SIZE * sizeof(char));
 
-    for(int i = 0; i < BLOOM_SIZE; ++i){
+    for(int i = 0; i < BLOOM_SIZE;){
         bloom_in_char[i >> 3] |= ((filter[i]) << (i & 7));
+        ++i;
+        bloom_in_char[i >> 3] |= ((filter[i]) << (i & 7));
+        ++i;
+        bloom_in_char[i >> 3] |= ((filter[i]) << (i & 7));
+        ++i;
+        bloom_in_char[i >> 3] |= ((filter[i]) << (i & 7));
+        ++i;
+        bloom_in_char[i >> 3] |= ((filter[i]) << (i & 7));
+        ++i;
+        bloom_in_char[i >> 3] |= ((filter[i]) << (i & 7));
+        ++i;
+        bloom_in_char[i >> 3] |= ((filter[i]) << (i & 7));
+        ++i;
+        bloom_in_char[i >> 3] |= ((filter[i]) << (i & 7));
+        ++i;
     }
 
     return bloom_in_char;

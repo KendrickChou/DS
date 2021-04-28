@@ -30,12 +30,14 @@ public:
     SSTable(std::string filePath,
             uint64_t timestamp,
         const std::vector<PAIR> &pairVec);
+
+    SSTable(const std::string &path);
     SSTable();
     ~SSTable();
 
     void get(uint64_t key,std::string &value);
 
-    std::string getByOffset(uint32_t begin,uint32_t end);
+    void getByOffset(std::string &value,uint32_t begin,uint32_t end);
 };
 
 #endif  //SSTable_H

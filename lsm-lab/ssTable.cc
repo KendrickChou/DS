@@ -125,9 +125,7 @@ void SSTable::get(uint64_t key,std::string &value){
  * if value is at the end of a file, then pass end = 0;
  */
 
-std::string SSTable::getByOffset(uint32_t begin,uint32_t end) {
-
-    std::string value = "";
+void SSTable::getByOffset(std::string &value, uint32_t begin,uint32_t end) {
 
     if (end == 0) {
         file.seekg(0, std::ios::end);
@@ -140,7 +138,7 @@ std::string SSTable::getByOffset(uint32_t begin,uint32_t end) {
     char s[len + 1];
     s[len] = '\0';
     file.read(s, len);
-    value =  s;
+    value = s;
 
-    return value;
+    return;
 }

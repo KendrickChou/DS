@@ -14,6 +14,7 @@ class DiskController {
 private:
     std::vector<diskLevel*> levels;
     uint64_t TIMESTAMP = 1;
+    void restoreFile();
 
 public:
     DiskController();

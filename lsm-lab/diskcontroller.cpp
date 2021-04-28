@@ -63,3 +63,7 @@ void DiskController::reset() {
     diskLevel *level0 = new diskLevel(0);
     levels.push_back(level0);
 }
+
+void DiskController::restoreFile(){
+    
+}

@@ -66,20 +66,21 @@ int diskLevel::compaction(int compactNum, diskLevel *upLevel) {
             oldVal = newVal;
         }
 
-        if(compactVec[curVec].empty()){
-            continue;
+        if(!compactVec[curVec].empty()){
+            que.emplace(compactVec[curVec].back(),curVec);
+            compactVec[curVec].pop_back();
         }
-
-        que.emplace(compactVec[curVec].back(),curVec);
-        compactVec[curVec].pop_back();
     }
 
-    std::string filePath = levelPath + "/" + std::to_string(maxtimestamp) + "-" + std::to_string(newVec[0].first) + ".sst";
-    SSTable *newTable = new SSTable(filePath,maxtimestamp,newVec);
-    fileMap.emplace(map_key(maxtimestamp,newTable->Header.minKey),newTable);
+    if(!newVec.empty()){
+        std::string filePath = levelPath + "/" + std::to_string(maxtimestamp) + "-" + std::to_string(newVec[0].first) + ".sst";
+        SSTable *newTable = new SSTable(filePath,maxtimestamp,newVec);
+        fileMap.emplace(map_key(maxtimestamp,newTable->Header.minKey),newTable);
+    }
 
     if(fileMap.size() > MAXNumber)
         return fileMap.size() - MAXNumber;
+        
     return 0;
 }
 
@@ -138,16 +139,16 @@ void diskLevel::convert2vector(const std::map<map_key ,SSTable *> &sets,
 
         key = iter->second->index[pos].first;
         offset = iter->second->index[pos].second;
-        value = iter->second->getByOffset(offset,0);
+        iter->second->getByOffset(value,offset,0);
         vecs[i].emplace_back(key,value);
 
+        nextOffset = offset;
         while(--pos >= 0){
             key = iter->second->index[pos].first;
             offset = iter->second->index[pos].second;
-            nextOffset = iter->second->index[pos + 1].second;
-            value = iter->second->getByOffset(offset,nextOffset);
-
+            iter->second->getByOffset(value,offset,nextOffset);
             vecs[i].emplace_back(key,value);
+            nextOffset = offset;
         }
 
         iter->second->file.close();
@@ -157,7 +158,7 @@ void diskLevel::convert2vector(const std::map<map_key ,SSTable *> &sets,
     }
 
 void diskLevel::push_back(uint32_t &size, uint64_t timestamp,std::vector<PAIR> &vec, PAIR KV) {
-    if(isLastLevel && KV.second == "~DELETED~"){
+    if(this->isLastLevel && KV.second == "~DELETED~"){
         return;
     }
 
@@ -193,7 +194,7 @@ void diskLevel::reset() {
         utils::rmfile((char *)iter->second->filePath.data());
     }
 
-    rmdir((char *)levelPath.data());
+    rmdir((char *)levelPath.c_str());
 }
 
 void diskLevel::insert(const std::vector<PAIR> &vec,uint64_t timestamp) {
