@@ -41,7 +41,7 @@ public:
     void insert(const std::vector<PAIR> &vec,uint64_t timestamp);
     int compaction(int compactNum,diskLevel *upLevel);
     void reset();
-    std::string get(uint64_t key);
+    void get(uint64_t key,std::string &value);
 
 };
 

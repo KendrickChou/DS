@@ -1,7 +1,7 @@
 #include "diskLevel.h"
 
 diskLevel::diskLevel(int level): level(level), MAXNumber(pow(2,level + 1)) {
-    levelPath = "../data/level" + std::to_string(level);
+    levelPath = "./data/level" + std::to_string(level);
     if(!utils::dirExists(levelPath)){
         utils::mkdir((char *)levelPath.data());
     } else{
@@ -174,28 +174,17 @@ void diskLevel::push_back(uint32_t &size, uint64_t timestamp,std::vector<PAIR> &
     }
 }
 
-std::string diskLevel::get(uint64_t key) {
+void diskLevel::get(uint64_t key,std::string &value) {
     auto iter = fileMap.rbegin();
-    std::string value;
-
-    if(level == 0){
-        for(;iter != fileMap.rend();++iter){
-            std::string tmpStr = iter->second->get(key);
-            if(!tmpStr.empty()) {
-                value = tmpStr;
-            }
-        }
-        return value;
-    }
 
     for(;iter != fileMap.rend();++iter){
-        value = iter->second->get(key);
+        iter->second->get(key,value);
         if(!value.empty()){
-            return value;
+            return;
         }
     }
 
-    return value;
+    return;
 
 }
 
@@ -208,7 +197,7 @@ void diskLevel::reset() {
 }
 
 void diskLevel::insert(const std::vector<PAIR> &vec,uint64_t timestamp) {
-    std::string filePath = "../data/level0/" + std::to_string(timestamp) + "-" + std::to_string(vec[0].first) + ".sst";
+    std::string filePath = "./data/level0/" + std::to_string(timestamp) + "-" + std::to_string(vec[0].first) + ".sst";
     SSTable *newTable = new SSTable (filePath,timestamp,vec);
 
     this->fileMap.emplace(map_key(newTable->Header.timestamp,newTable->Header.minKey),newTable);

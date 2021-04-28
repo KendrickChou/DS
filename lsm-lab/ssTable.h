@@ -29,11 +29,11 @@ public:
 
     SSTable(std::string filePath,
             uint64_t timestamp,
-        std::vector<PAIR> pairVec);
+        const std::vector<PAIR> &pairVec);
     SSTable();
     ~SSTable();
 
-    std::string get(uint64_t key);
+    void get(uint64_t key,std::string &value);
 
     std::string getByOffset(uint32_t begin,uint32_t end);
 };

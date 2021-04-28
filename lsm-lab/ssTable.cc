@@ -6,7 +6,7 @@ SSTable::SSTable(){
 
 SSTable::SSTable(std::string filePath,
     uint64_t timestamp,
-    std::vector<PAIR> pairVec){
+    const std::vector<PAIR> &pairVec){
         this->Header.timestamp = timestamp;
         this->Header.numOfkey = pairVec.size();
         this->Header.minKey = pairVec[0].first;
@@ -93,14 +93,13 @@ bool SSTable::isContain(uint64_t key){
     return true;
 }
 
-std::string SSTable::get(uint64_t key){
+void SSTable::get(uint64_t key,std::string &value){
     file.open(filePath,std::ios::in|std::ios::binary);
-    std::string value;
 
     if(!isContain(key)) {
         file.close();
         file.clear();
-        return value;
+        return;
     }
 
     uint32_t beginPos = 0;
@@ -118,7 +117,7 @@ std::string SSTable::get(uint64_t key){
 
     file.clear();
     file.close();
-    return value;
+    return;
 }
 
 /*

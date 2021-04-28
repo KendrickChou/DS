@@ -42,7 +42,7 @@ std::string KVStore::get(uint64_t key)
     std::string value = memTable->get(key);
 
     if(value.empty()){
-        value = diskController->get(key);
+        diskController->get(key,value);
     }
 
     if(value == "~DELETED~"){

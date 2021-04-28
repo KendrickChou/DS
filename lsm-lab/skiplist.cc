@@ -1,6 +1,7 @@
 #include "skiplist.h"
 
 SkipList::SkipList(){
+    srand(time(NULL));
     head = new node;
 }
 
@@ -91,7 +92,6 @@ bool SkipList::put(uint64_t key,std::string value){
             break;
         }
         node *putNode = new node(nullptr,nullptr,nullptr, key,value);
-        srand(time(NULL));
         continueInsert = (rand()&1);    //50% continue input
         iter = pathList[i];
         node *nextNode = iter->next;

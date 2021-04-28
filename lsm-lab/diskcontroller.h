@@ -20,7 +20,7 @@ public:
     ~DiskController();
 
     void insert(const std::vector<PAIR> &vec);
-    std::string get(uint64_t key);
+    void get(uint64_t key,std::string &value);
     void reset();
 
 };

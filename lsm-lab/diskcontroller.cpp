@@ -38,20 +38,16 @@ void DiskController::insert(const std::vector<PAIR> &vec) {
     }
 }
 
-std::string DiskController::get(uint64_t key) {
+void DiskController::get(uint64_t key,std::string &value) {
     size_t sizeOfLevels = levels.size();
-    std::string value;
     uint64_t timestamp = 0;
 
     for(int i = 0;i < sizeOfLevels; ++i){
-        std::string tmpStr = levels[i]->get(key);
-        if(!tmpStr.empty()){
-            value = tmpStr;
-            return value;
+        levels[i]->get(key,value);
+        if(!value.empty()){
+            return;
         }
     }
-
-    return value;
 }
 
 void DiskController::reset() {
