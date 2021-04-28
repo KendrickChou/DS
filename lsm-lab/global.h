@@ -26,9 +26,8 @@ const size_t BLOOM_SIZE = 81920;
 struct header{
     uint64_t timestamp = 0;
     uint64_t numOfkey = 0;
-    int64_t minKey = 0;
-    int64_t maxKey = 0;
+    uint64_t minKey = 0;
+    uint64_t maxKey = 0;
 };
 
-static uint64_t TIMESTAMP = 1;
 #endif //LSM_TREE_GLOBAL_H

@@ -53,7 +53,7 @@ public:
     bool put(uint64_t key,std::string value);
     bool del(uint64_t key);
     void reset();
-    std::vector<std::pair<uint64_t,std::string>>* getAll();
+    void getAll(std::vector<PAIR> &vec);
     void updateFileSize(const std::string *newValue,const std::string *oldValue);
 
     void show();

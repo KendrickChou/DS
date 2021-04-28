@@ -177,11 +177,12 @@ void SkipList::show(){
     std::cout << "listSize: " << listSize << "  fileSize: " << fileSize << '\n';
 }
 
-std::vector<std::pair<uint64_t,std::string>>* SkipList::getAll(){
+void SkipList::getAll(std::vector<PAIR> &vec){
 
-    if(!head->next) return nullptr;
+    if(!head->next) {
+        return;
+    }
 
-    std::vector<PAIR>* vec = new std::vector<PAIR>;
     node *iter = head;
 
     while(iter->down){
@@ -189,9 +190,8 @@ std::vector<std::pair<uint64_t,std::string>>* SkipList::getAll(){
     }
 
     while(iter->next){
-        vec->push_back(iter->next->data);
+        vec.push_back(iter->next->data);
         iter = iter->next;
     }
 
-    return vec;
 }
