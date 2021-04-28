@@ -10,10 +10,6 @@ SkipList::~SkipList (){
     delete head;
 }
 
-size_t SkipList::size(){
-    return listSize;
-}
-
 /*
  * updateFileSize:
  * if only newValue == NULL, means delete a node from list
@@ -37,22 +33,25 @@ void SkipList::updateFileSize(const std::string *newValue,const std::string *old
 node* SkipList::find(uint64_t key){
     node *iter = head;
     while(iter){
-        while(iter->next && iter->next->key() < key){
+        while(iter->next && iter->next->data.first < key){
             iter = iter->next;
         }
-        if(iter->next && iter->next->key() == key) return iter->next;
+        if(iter->next && iter->next->data.first == key) return iter->next;
         iter = iter->down;
     }
     return nullptr;
 }
 
-std::string SkipList::get(uint64_t key){
+void SkipList::get(uint64_t key, std::string &value){
     node *target = this->find(key);
-    if(target) return target->value();
-    return "";
+    if(target){
+        value = target->data.second;
+        return;
+    }
+    return;
 }
 
-bool SkipList::put(uint64_t key,std::string value){
+bool SkipList::put(uint64_t key,const std::string &value){
     std::vector<node *> pathList;   //store search path
     node *iter;
 
@@ -75,7 +74,7 @@ bool SkipList::put(uint64_t key,std::string value){
     //get path
 
     while(iter){
-        while(iter->next && iter->next->key() < key){
+        while(iter->next && iter->next->data.first < key){
             iter = iter->next;
         }
         pathList.push_back(iter);
@@ -116,7 +115,6 @@ bool SkipList::put(uint64_t key,std::string value){
         head = newHead;
     }
 
-    ++listSize;
     delete tail;
     return true;
 }
@@ -141,7 +139,6 @@ bool SkipList::del(uint64_t key){
             delete delNode;
         }
     }
-    --listSize;
     return true;
 }
 
@@ -158,7 +155,6 @@ void SkipList::reset(){
         delete iter;
     }
     head = new node;
-    listSize = 0;
     fileSize = BASESIZE;
 }
 
@@ -168,13 +164,12 @@ void SkipList::show(){
     while(iter) {
         while (iter->next) {
             iter = iter->next;
-            std::cout << iter->key() << " " << iter->value() << "|";
+            std::cout << iter->data.first << " " << iter->data.second << "|";
         }
         std::cout << '\n';
         iter = headIter->down;
         headIter = iter;
     }
-    std::cout << "listSize: " << listSize << "  fileSize: " << fileSize << '\n';
 }
 
 void SkipList::getAll(std::vector<PAIR> &vec){

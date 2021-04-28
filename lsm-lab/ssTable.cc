@@ -4,6 +4,10 @@ SSTable::SSTable(){
 
 }
 
+/*
+ *  construct a SSTable from a vector.
+ *  You can use this when convert memTable to SSTable or compact SSTables.
+ */
 SSTable::SSTable(std::string filePath,
     uint64_t timestamp,
     const std::vector<PAIR> &pairVec){
@@ -45,6 +49,35 @@ SSTable::SSTable(std::string filePath,
 
     file.close();
     file.clear();
+}
+
+/*
+ *  construct a SSTable from an existed file
+ *  You can use this when restore a file
+ */
+SSTable::SSTable(const std::string &filePath){
+    this->filePath = filePath;
+
+    file.open(filePath,std::ios::in|std::ios::binary);
+
+    file.read((char *)(&this->Header.timestamp),8);
+    file.read((char *)(&this->Header.numOfkey),8);
+    file.read((char *)(&this->Header.minKey),8);
+    file.read((char *)(&this->Header.maxKey),8);
+
+    int sizeOfBloom_in_char = BLOOM_SIZE >> 3;
+    char bloom_in_char[sizeOfBloom_in_char];
+    file.read(bloom_in_char,sizeOfBloom_in_char);
+
+    this->filter.bytes_to_bitset(bloom_in_char);
+
+    uint64_t key = 0;
+    uint32_t offset = 0;
+    for(int i = 0;i < this->Header.numOfkey; ++i){
+        file.read((char*) &key,8);
+        file.read((char*)offset,4);
+        index.emplace_back(key,offset);
+    }
 }
 
 SSTable::~SSTable(){

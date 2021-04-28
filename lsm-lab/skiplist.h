@@ -26,14 +26,6 @@ struct node
         data(std::pair<uint64_t,std::string>(key,value)){}
 
     node():pre(nullptr),next(nullptr),down(nullptr) {}
-
-    uint64_t key(){
-        return data.first;
-    }
-
-    std::string value(){
-        return data.second;
-    }
 };
 
 
@@ -42,15 +34,13 @@ class SkipList {
 private:
     node *head;
     node* find(uint64_t key);
-    size_t listSize = 0;
     uint32_t fileSize = BASESIZE;
 
 public:
     SkipList();
     ~SkipList();
-    size_t size();
-    std::string get(uint64_t key);
-    bool put(uint64_t key,std::string value);
+    void get(uint64_t key, std::string &value);
+    bool put(uint64_t key,const std::string &value);
     bool del(uint64_t key);
     void reset();
     void getAll(std::vector<PAIR> &vec);

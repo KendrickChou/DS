@@ -13,8 +13,8 @@
 typedef std::pair<PAIR,int> que_key;
 
 struct LESS{
-    bool operator() (que_key kv1,
-                     que_key kv2){
+    bool operator() (const que_key &kv1,
+                     const que_key &kv2){
         return kv1.first.first > kv2.first.first;
     }
 };
@@ -26,7 +26,7 @@ private:
     void matchScope(int compactNum, uint64_t &maxTimeStamp, diskLevel *upLevel,std::map<map_key ,SSTable*> &res);
     void convert2vector(const std::map<map_key ,SSTable *> &sets,
                         std::vector<std::pair<uint64_t, std::string>> *vecs);
-    void push_back(uint32_t &size,uint64_t timestamp,std::vector<PAIR> &vec, PAIR KV);
+    void push_back(uint32_t &size,uint64_t timestamp,std::vector<PAIR> &vec, PAIR &KV);
 
 public:
     const int MAXNumber;
@@ -43,6 +43,7 @@ public:
     void reset();
     void get(uint64_t key,std::string &value);
 
+    int restoreLevel(const std::string &path);
 };
 
 #endif  //DISKLEVEL_H

@@ -64,6 +64,41 @@ void DiskController::reset() {
     levels.push_back(level0);
 }
 
-void DiskController::restoreFile(){
-    
+void DiskController::restoreController(){
+    std::string prefix = "./data/level";
+    int suffix = 0;
+    std::string path;
+    int compactNum = 0;
+    int compactLevel = 0;
+
+    while(true){
+        path = prefix + std::to_string(suffix);
+        if(!utils::dirExists(path))
+            break;
+
+        if(levels.size() == suffix){
+            levels[suffix - 1]->isLastLevel = false;
+            diskLevel *newLevel = new diskLevel(suffix);
+        }
+        if((compactNum = levels[suffix]->restoreLevel(path) > 0)){
+            compactLevel = suffix;
+        }
+        ++suffix;
+    }
+
+    if(compactLevel == 0){
+        compactNum = levels[0]->fileMap.size();
+    }
+
+    while (compactNum > 0) {
+        if (levels.size() == compactLevel) {
+            levels[compactLevel - 1]->isLastLevel = false;
+            diskLevel *newLevel = new diskLevel(compactLevel);
+            levels.push_back(newLevel);
+        }
+
+        compactNum = levels[compactLevel]->compaction(compactNum, levels[compactLevel - 1]);
+        ++compactLevel;
+    }
+
 }

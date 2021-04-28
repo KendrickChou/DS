@@ -25,6 +25,8 @@ public:
     bool mayContain(uint64_t key);
     char* bitset_to_bytes();
 
+    void bytes_to_bitset(char *bytes);
+
     friend std::ostream & operator <<(std::ostream & os, bloom &Filter);
 };
 
@@ -100,6 +102,12 @@ inline bool bloom::mayContain(uint64_t key){
 inline std::ostream & operator <<(std::ostream & os, bloom &Filter){
     os << Filter.filter;
     return os;
+}
+
+inline void bloom::bytes_to_bitset(char* bytes){
+    for(int i = 0; i < BLOOM_SIZE; ++i){
+        this->filter[i] = (bytes[i >> 3] >> (i % 7)) & 1;
+    }
 }
 
 //inline std::istream & operator >>(std::istream & is,bloom &Filter){

@@ -5,6 +5,8 @@ KVStore::KVStore(const std::string &dir): KVStoreAPI(dir)
 {
 	memTable = new SkipList;
 	diskController = new DiskController;
+
+    diskController->restoreController();
 }
 
 KVStore::~KVStore()
@@ -39,7 +41,8 @@ void KVStore::put(uint64_t key, const std::string &s)
  */
 std::string KVStore::get(uint64_t key)
 {
-    std::string value = memTable->get(key);
+    std::string value;
+    memTable->get(key,value);
 
     if(value.empty()){
         diskController->get(key,value);
@@ -57,9 +60,7 @@ std::string KVStore::get(uint64_t key)
  */
 bool KVStore::del(uint64_t key)
 {
-    std::string delVal = get(key);
-
-    if(!delVal.empty())
+    if(!get(key).empty())
     {
         memTable->del(key);
         std::string value = "~DELETED~";

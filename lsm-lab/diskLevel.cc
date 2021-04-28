@@ -157,7 +157,7 @@ void diskLevel::convert2vector(const std::map<map_key ,SSTable *> &sets,
     }
     }
 
-void diskLevel::push_back(uint32_t &size, uint64_t timestamp,std::vector<PAIR> &vec, PAIR KV) {
+void diskLevel::push_back(uint32_t &size, uint64_t timestamp,std::vector<PAIR> &vec, PAIR &KV) {
     if(this->isLastLevel && KV.second == "~DELETED~"){
         return;
     }
@@ -202,4 +202,22 @@ void diskLevel::insert(const std::vector<PAIR> &vec,uint64_t timestamp) {
     SSTable *newTable = new SSTable (filePath,timestamp,vec);
 
     this->fileMap.emplace(map_key(newTable->Header.timestamp,newTable->Header.minKey),newTable);
+}
+
+int diskLevel::restoreLevel(const std::string &path){
+    std::vector<std::string> fileName;
+
+    utils::scanDir(path,fileName);
+
+    for(auto name : fileName){
+        SSTable *newTable = new SSTable(path + "/" + name);
+        fileMap.emplace(map_key(newTable->Header.timestamp,
+                    newTable->Header.minKey),newTable);
+    }
+
+    if(fileMap.size() > MAXSIZE){
+        return fileMap.size() - MAXSIZE;
+    }
+    return 0;
+    
 }

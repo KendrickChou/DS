@@ -14,7 +14,6 @@ class DiskController {
 private:
     std::vector<diskLevel*> levels;
     uint64_t TIMESTAMP = 1;
-    void restoreFile();
 
 public:
     DiskController();
@@ -23,6 +22,7 @@ public:
     void insert(const std::vector<PAIR> &vec);
     void get(uint64_t key,std::string &value);
     void reset();
+    void restoreController();
 
 };
 
