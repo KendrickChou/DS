@@ -4,7 +4,7 @@ SSTable::SSTable(){
 
 }
 
-/*
+/**
  *  construct a SSTable from a vector.
  *  You can use this when convert memTable to SSTable or compact SSTables.
  */
@@ -51,7 +51,7 @@ SSTable::SSTable(std::string filePath,
     file.clear();
 }
 
-/*
+/**
  *  construct a SSTable from an existed file
  *  You can use this when restore a file
  */
@@ -87,7 +87,8 @@ SSTable::SSTable(const std::string filePath){
 SSTable::~SSTable(){
 }
 
-/* input a key, find the corresponding value.
+/**
+ * input a key, find the corresponding value.
  * if exist, return beginPos and len
  * if not, beginPos = 0, len = 0;
  */
@@ -120,6 +121,9 @@ void SSTable::locateValuePos(uint64_t key, uint32_t &beginPos, uint32_t &len){
     }
 }
 
+/**
+ *  isContain: Check if a key value is possible.
+ */
 bool SSTable::isContain(uint64_t key){
     if(Header.minKey > key || Header.maxKey < key) return false;
 
@@ -130,6 +134,10 @@ bool SSTable::isContain(uint64_t key){
     return true;
 }
 
+/**
+ * get: get value by key.
+ * if failed, return an empty string.
+ */
 void SSTable::get(uint64_t key,std::string &value){
     file.open(filePath,std::ios::in|std::ios::binary);
 
@@ -157,11 +165,10 @@ void SSTable::get(uint64_t key,std::string &value){
     return;
 }
 
-/*
+/**
  * getByOffset - get the value by offset
  * if value is at the end of a file, then pass end = 0;
  */
-
 void SSTable::getByOffset(std::string &value, uint32_t begin,uint32_t end) {
 
     if (end == 0) {

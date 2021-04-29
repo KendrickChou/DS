@@ -14,9 +14,13 @@ DiskController::~DiskController() {
         delete levels[i];
         levels[i] = nullptr;
     }
-
 }
 
+/*
+ *  insert: insert a memTable to disk
+ *  You must convert the memTable to a vector to
+ *  meet the parameter requirements.
+ */
 void DiskController::insert(const std::vector<PAIR> &vec) {
     levels[0]->insert(vec,TIMESTAMP++);
 
@@ -38,6 +42,10 @@ void DiskController::insert(const std::vector<PAIR> &vec) {
     }
 }
 
+/**
+ *  get: get value by key
+ *  store the result in the second parameter
+ */
 void DiskController::get(uint64_t key,std::string &value) {
     size_t sizeOfLevels = levels.size();
 
@@ -49,6 +57,10 @@ void DiskController::get(uint64_t key,std::string &value) {
     }
 }
 
+/**
+ *  reset: reset disk
+ *  delete all SSTable files and level directory
+ */
 void DiskController::reset() {
     for(int i = 0;i < levels.size(); ++i){
         levels[i]->reset();
@@ -63,6 +75,9 @@ void DiskController::reset() {
     levels.push_back(level0);
 }
 
+/**
+ *  restoreController: restore existing files when progress start
+ */
 void DiskController::restoreController(){
     std::string prefix = "./data/level";
     int suffix = 0;

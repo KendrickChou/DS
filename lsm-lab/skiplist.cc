@@ -10,7 +10,7 @@ SkipList::~SkipList (){
     delete head;
 }
 
-/*
+/**
  * updateFileSize:
  * if only newValue == NULL, means delete a node from list
  * if only oldValue == NULL, means add a node from list
@@ -30,6 +30,10 @@ void SkipList::updateFileSize(const std::string *newValue,const std::string *old
     return;
 }
 
+/**
+ * find: find node by key.
+ * if failed, return nullptr.
+ */
 node* SkipList::find(uint64_t key){
     node *iter = head;
     while(iter){
@@ -42,6 +46,10 @@ node* SkipList::find(uint64_t key){
     return nullptr;
 }
 
+/**
+ * get: get value by key.
+ * if failed, return an empty string.
+ */
 void SkipList::get(uint64_t key, std::string &value){
     node *target = this->find(key);
     if(target){
@@ -51,6 +59,10 @@ void SkipList::get(uint64_t key, std::string &value){
     return;
 }
 
+/**
+ * put: put a KV to skiplist
+ * if failed, return false.
+ */
 bool SkipList::put(uint64_t key,const std::string &value){
     std::vector<node *> pathList;   //store search path
     node *iter;
@@ -119,6 +131,10 @@ bool SkipList::put(uint64_t key,const std::string &value){
     return true;
 }
 
+/**
+ * del: del value by key.
+ * if failed, return false.
+ */
 bool SkipList::del(uint64_t key){
     node *iter = this->find(key);
 
@@ -142,6 +158,10 @@ bool SkipList::del(uint64_t key){
     return true;
 }
 
+/**
+ * reset: reset skiplist.
+ * clear all nodes
+ */
 void SkipList::reset(){
     while(head){
         node *iter = head->next;
@@ -158,6 +178,9 @@ void SkipList::reset(){
     fileSize = BASESIZE;
 }
 
+/**
+ * show: print details of skiplist to screen.
+ */
 void SkipList::show(){
     node *iter = head;
     node *headIter = head;
@@ -172,6 +195,10 @@ void SkipList::show(){
     }
 }
 
+/**
+ * getALL: get all KV.
+ * All KVs store in a vector
+ */
 void SkipList::getAll(std::vector<PAIR> &vec){
 
     if(!head->next) {

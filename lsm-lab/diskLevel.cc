@@ -1,9 +1,15 @@
 #include "diskLevel.h"
 
+/**
+ * used for restoring level.
+ */
 diskLevel::diskLevel(int level,bool restore):level(level), MAXNumber(pow(2,level + 1)) {
 
 }
 
+/**
+ *  used for construct an inexistent level 
+ */
 diskLevel::diskLevel(int level): level(level), MAXNumber(pow(2,level + 1)) {
     levelPath = "./data/level" + std::to_string(level);
     if(!utils::dirExists(levelPath)){
@@ -26,7 +32,7 @@ diskLevel::~diskLevel() {
     }
 }
 
-/*
+/**
  * compaction - compact two diskLevel.
  *  Return the number of overflowing SSTables, if there is no overflow,
  *  return 0
@@ -88,6 +94,9 @@ int diskLevel::compaction(int compactNum, diskLevel *upLevel) {
     return 0;
 }
 
+/**
+ *  matchScope: match the SSTables needed to compact
+ */
 void diskLevel::matchScope(int compactNum, uint64_t &maxTimeStamp, diskLevel *upLevel,std::map<map_key ,SSTable*> &res) {
     auto iter = this->fileMap.begin();
 
@@ -125,6 +134,9 @@ void diskLevel::matchScope(int compactNum, uint64_t &maxTimeStamp, diskLevel *up
     }
 }
 
+/**
+ * convert2vector: convert SSTable-map to KV-vector
+ */
 void diskLevel::convert2vector(const std::map<map_key ,SSTable *> &sets,
                                std::vector<std::pair<uint64_t, std::string>> *vecs) {
     if(sets.empty()) return;
@@ -161,6 +173,9 @@ void diskLevel::convert2vector(const std::map<map_key ,SSTable *> &sets,
     }
     }
 
+/**
+ * push_back: push_back a KV to vector
+ */
 void diskLevel::push_back(uint32_t &size, uint64_t timestamp,std::vector<PAIR> &vec, PAIR &KV) {
     if(this->isLastLevel && KV.second == "~DELETED~"){
         return;
@@ -179,6 +194,10 @@ void diskLevel::push_back(uint32_t &size, uint64_t timestamp,std::vector<PAIR> &
     }
 }
 
+/**
+ * get: get value by key.
+ * if failed, return an empty string.
+ */
 void diskLevel::get(uint64_t key,std::string &value) {
     auto iter = fileMap.rbegin();
 

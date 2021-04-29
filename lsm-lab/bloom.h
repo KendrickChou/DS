@@ -42,6 +42,10 @@ inline void bloom::hashKey(uint64_t key,unsigned int *hash){
     MurmurHash3_x64_128(&key,sizeof(key),1,hash);
 }
 
+/**
+ * bitset_to_bytes: convert bitset to char array.
+ * bit to bit,rather than bit to byte
+ */
 inline char* bloom::bitset_to_bytes(){
     size_t CHAR_SIZE = BLOOM_SIZE >> 3;
     char *bloom_in_char = new char [CHAR_SIZE];
@@ -69,6 +73,16 @@ inline char* bloom::bitset_to_bytes(){
     return bloom_in_char;
 }
 
+/**
+ * bitset_to_bytes: convert char array to bitset.
+ * bit to bit,rather than byte to bit.
+ */
+inline void bloom::bytes_to_bitset(char* bytes){
+    for(int i = 0; i < BLOOM_SIZE; ++i){
+        this->filter[i] = (bytes[i >> 3] >> (i & 7)) & 1;
+    }
+}
+
 inline void bloom::addKey(uint64_t key){
     unsigned int *hash = new unsigned int [4];
     memset(hash,0,sizeof(hash));
@@ -83,6 +97,9 @@ inline void bloom::addKey(uint64_t key){
     return;
 }
 
+/**
+ * mayContain: Check if a key value is possible
+ */
 inline bool bloom::mayContain(uint64_t key){
     unsigned int *hash = new unsigned int [4];
     memset(hash,0,sizeof(hash));
@@ -99,25 +116,14 @@ inline bool bloom::mayContain(uint64_t key){
     return true;
 }
 
+/**
+ * override operator "<<"
+ * (for test)
+ */
 inline std::ostream & operator <<(std::ostream & os, bloom &Filter){
     os << Filter.filter;
     return os;
 }
-
-inline void bloom::bytes_to_bitset(char* bytes){
-    for(int i = 0; i < BLOOM_SIZE; ++i){
-        this->filter[i] = (bytes[i >> 3] >> (i & 7)) & 1;
-    }
-}
-
-//inline std::istream & operator >>(std::istream & is,bloom &Filter){
-//    char filter_string[BLOOM_SIZE + 1];
-//    is.get(filter_string,BLOOM_SIZE + 1);
-//    std::bitset<BLOOM_SIZE> newFilter{std::string(filter_string)};
-//    Filter.filter.reset();
-//    Filter.filter |= newFilter;
-//    return is;
-//}
 
 
 #endif  //BLOOM_H
