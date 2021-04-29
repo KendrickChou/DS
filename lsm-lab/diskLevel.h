@@ -13,9 +13,9 @@
 typedef std::pair<PAIR,int> que_key;
 
 struct LESS{
-    bool operator() (const que_key &kv1,
-                     const que_key &kv2){
-        return kv1.first.first > kv2.first.first;
+    bool operator() (const que_key &kv1,const que_key &kv2){
+        return ((kv1.first.first > kv2.first.first) ||
+                (kv1.first.first == kv2.first.first && kv1.second < kv2.second));
     }
 };
 
@@ -36,6 +36,7 @@ public:
     std::map<map_key ,SSTable* > fileMap;
 
     diskLevel(int level);
+    diskLevel(int level,bool restore);
     ~diskLevel();
 
     void insert(const std::vector<PAIR> &vec,uint64_t timestamp);

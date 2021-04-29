@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <string>
 #include <cassert>
+#include "global.h"
 
 #include "test.h"
 
@@ -60,6 +61,7 @@ private:
 		/**
 		 * Write 10MB data to drain previous data out of memory.
 		 */
+
 		for (i = 0; i <= 10240; ++i)
 			store.put(max + i, std::string(1024, 'x'));
 

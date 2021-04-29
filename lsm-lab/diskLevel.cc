@@ -1,5 +1,9 @@
 #include "diskLevel.h"
 
+diskLevel::diskLevel(int level,bool restore):level(level), MAXNumber(pow(2,level + 1)) {
+
+}
+
 diskLevel::diskLevel(int level): level(level), MAXNumber(pow(2,level + 1)) {
     levelPath = "./data/level" + std::to_string(level);
     if(!utils::dirExists(levelPath)){
@@ -101,8 +105,8 @@ void diskLevel::matchScope(int compactNum, uint64_t &maxTimeStamp, diskLevel *up
 
         ++resiter;
         for(;iter != fileMap.end();++iter){
-            if((iter->second->Header.minKey < minKey && iter->second->Header.maxKey > minKey) ||
-                    (iter->second->Header.maxKey > maxKey && iter->second->Header.minKey < maxKey)){
+            if((iter->second->Header.minKey <= minKey && iter->second->Header.maxKey >= minKey) ||
+                    (iter->second->Header.maxKey >= maxKey && iter->second->Header.minKey <= maxKey)){
                 if(!res.count(iter->first)){
                     res.emplace(iter->first,iter->second);
                 }

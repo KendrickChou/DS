@@ -106,7 +106,7 @@ inline std::ostream & operator <<(std::ostream & os, bloom &Filter){
 
 inline void bloom::bytes_to_bitset(char* bytes){
     for(int i = 0; i < BLOOM_SIZE; ++i){
-        this->filter[i] = (bytes[i >> 3] >> (i % 7)) & 1;
+        this->filter[i] = (bytes[i >> 3] >> (i & 7)) & 1;
     }
 }
 

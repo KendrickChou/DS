@@ -7,9 +7,10 @@
 class KVStore : public KVStoreAPI {
 	// You can add your implementation here
 private:
-	SkipList *memTable;
+
 	DiskController *diskController;
 public:
+    SkipList *memTable;
 	KVStore(const std::string &dir);
 
 	~KVStore();

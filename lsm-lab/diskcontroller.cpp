@@ -40,7 +40,6 @@ void DiskController::insert(const std::vector<PAIR> &vec) {
 
 void DiskController::get(uint64_t key,std::string &value) {
     size_t sizeOfLevels = levels.size();
-    uint64_t timestamp = 0;
 
     for(int i = 0;i < sizeOfLevels; ++i){
         levels[i]->get(key,value);
@@ -53,7 +52,7 @@ void DiskController::get(uint64_t key,std::string &value) {
 void DiskController::reset() {
     for(int i = 0;i < levels.size(); ++i){
         levels[i]->reset();
-        utils::rmdir((char*)levels[i]->levelPath.data());
+        utils::rmdir((char*)levels[i]->levelPath.c_str());
         delete levels[i];
         levels[i] = nullptr;
     }
@@ -76,28 +75,30 @@ void DiskController::restoreController(){
         if(!utils::dirExists(path))
             break;
 
-        if(levels.size() == suffix){
-            levels[suffix - 1]->isLastLevel = false;
-            diskLevel *newLevel = new diskLevel(suffix);
+        levels[suffix]->levelPath = path;
+        if((levels.size() - 1) == suffix){
+            levels[suffix]->isLastLevel = false;
+            diskLevel *newLevel = new diskLevel(suffix + 1,true);
+            levels.push_back(newLevel);
         }
-        if((compactNum = levels[suffix]->restoreLevel(path) > 0)){
+        if((compactNum = levels[suffix]->restoreLevel(path)) > 0){
             compactLevel = suffix;
         }
         ++suffix;
     }
 
-    if(compactLevel == 0){
+    if(compactNum && !compactLevel){
         compactNum = levels[0]->fileMap.size();
     }
 
     while (compactNum > 0) {
-        if (levels.size() == compactLevel) {
-            levels[compactLevel - 1]->isLastLevel = false;
-            diskLevel *newLevel = new diskLevel(compactLevel);
+        if ((levels.size() - 1) == compactLevel) {
+            levels[compactLevel]->isLastLevel = false;
+            diskLevel *newLevel = new diskLevel(compactLevel + 1);
             levels.push_back(newLevel);
         }
 
-        compactNum = levels[compactLevel]->compaction(compactNum, levels[compactLevel - 1]);
+        compactNum = levels[compactLevel + 1]->compaction(compactNum, levels[compactLevel]);
         ++compactLevel;
     }
 

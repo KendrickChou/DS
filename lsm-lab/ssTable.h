@@ -31,7 +31,7 @@ public:
             uint64_t timestamp,
         const std::vector<PAIR> &pairVec);
 
-    SSTable(const std::string &filePath);
+    SSTable(const std::string filePath);
     SSTable();
     ~SSTable();
 

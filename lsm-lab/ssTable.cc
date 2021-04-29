@@ -55,7 +55,7 @@ SSTable::SSTable(std::string filePath,
  *  construct a SSTable from an existed file
  *  You can use this when restore a file
  */
-SSTable::SSTable(const std::string &filePath){
+SSTable::SSTable(const std::string filePath){
     this->filePath = filePath;
 
     file.open(filePath,std::ios::in|std::ios::binary);
@@ -66,7 +66,8 @@ SSTable::SSTable(const std::string &filePath){
     file.read((char *)(&this->Header.maxKey),8);
 
     int sizeOfBloom_in_char = BLOOM_SIZE >> 3;
-    char bloom_in_char[sizeOfBloom_in_char];
+    char bloom_in_char[sizeOfBloom_in_char + 1];
+    bloom_in_char[sizeOfBloom_in_char] = '\0';
     file.read(bloom_in_char,sizeOfBloom_in_char);
 
     this->filter.bytes_to_bitset(bloom_in_char);
@@ -75,9 +76,12 @@ SSTable::SSTable(const std::string &filePath){
     uint32_t offset = 0;
     for(int i = 0;i < this->Header.numOfkey; ++i){
         file.read((char*) &key,8);
-        file.read((char*)offset,4);
+        file.read((char*) &offset,4);
         index.emplace_back(key,offset);
     }
+
+    file.close();
+    file.clear();
 }
 
 SSTable::~SSTable(){
@@ -148,8 +152,8 @@ void SSTable::get(uint64_t key,std::string &value){
         value =  s;
     }
 
-    file.clear();
     file.close();
+    file.clear();
     return;
 }
 
