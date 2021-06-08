@@ -4,9 +4,14 @@
 KVStore::KVStore(const std::string &dir): KVStoreAPI(dir)
 {
 	memTable = new SkipList;
-	diskController = new DiskController;
 
-    diskController->restoreController();
+     if(utils::dirExists("./data/level0")){
+	    diskController = new DiskController;
+        diskController->restoreController();
+    }
+    else{
+        diskController = new DiskController;
+    }
 }
 
 KVStore::~KVStore()
