@@ -94,7 +94,12 @@ void DiskController::restoreController(){
         path = prefix + std::to_string(suffix);
         if(!utils::dirExists(path))
         {
+            if(suffix != 0){
+                levels[suffix - 1]->isLastLevel = true;
+            }
+            diskLevel *deleteLevel = levels[suffix];
             levels.pop_back();
+            delete deleteLevel;
             break;
         }
 
