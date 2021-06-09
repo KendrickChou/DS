@@ -17,6 +17,7 @@ private:
 
 public:
     DiskController();
+    DiskController(bool restoreMode);
     ~DiskController();
 
     void insert(const std::vector<PAIR> &vec);

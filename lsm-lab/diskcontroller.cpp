@@ -9,6 +9,11 @@ DiskController::DiskController() {
     levels.push_back(level0);
 }
 
+DiskController::DiskController(bool restoreMode) {
+    diskLevel *level0 = new diskLevel(0,1);
+    levels.push_back(level0);
+}
+
 DiskController::~DiskController() {
     for(int i = 0;i < levels.size(); ++i){
         delete levels[i];
@@ -88,7 +93,10 @@ void DiskController::restoreController(){
     while(true){
         path = prefix + std::to_string(suffix);
         if(!utils::dirExists(path))
+        {
+            levels.pop_back();
             break;
+        }
 
         levels[suffix]->levelPath = path;
         if((levels.size() - 1) == suffix){
